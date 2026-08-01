@@ -1,0 +1,21 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("POSTGRES_URL")
+}
+
+/// Chunks vectorizados aislados por curso (multi-tenancy via metadata filtering).
+model documents {
+  id        BigInt                 @id @default(autoincrement())
+  courseId  String // AISLAMIENTO: Identificador del curso
+  content   String?
+  embedding Unsupported("vector")? // Vector de OpenAI (1536 dimensiones)
+  metadata  Json?                  @default("{}") // Metadatos extra (autor, tipo, etc)
+  createdAt DateTime               @default(now())
+  updatedAt DateTime               @updatedAt
+
+  @@index([courseId])
+}

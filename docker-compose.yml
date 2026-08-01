@@ -1,0 +1,74 @@
+services:
+  postgres:
+    image: pgvector/pgvector:pg16
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-eduai}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-eduai}
+      POSTGRES_DB: ${POSTGRES_DB:-eduai}
+    ports:
+      - '${PUERTO_POSTGRES:-5432}:5432'
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./docker/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test:
+        [
+          'CMD-SHELL',
+          'pg_isready -U ${POSTGRES_USER:-eduai} -d ${POSTGRES_DB:-eduai}',
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    networks:
+      - app-network
+
+  app:
+    build:
+      context: .
+      dockerfile: ./docker/Dockerfile.dev
+      network: host
+    restart: unless-stopped
+    environment:
+      NODE_ENV: development
+      SKIP_ENV_VALIDATION: '1'
+      AI_GATEWAY_API_KEY: ${AI_GATEWAY_API_KEY:-}
+      POSTGRES_URL: postgresql://${POSTGRES_USER:-eduai}:${POSTGRES_PASSWORD:-eduai}@postgres:5432/${POSTGRES_DB:-eduai}?schema=public
+      PGUSER: ${POSTGRES_USER:-eduai}
+      PGPASSWORD: ${POSTGRES_PASSWORD:-eduai}
+      PGHOST: postgres
+      PGPORT: '5432'
+      PGDATABASE: ${POSTGRES_DB:-eduai}
+      PGSSL: 'false'
+      INNGEST_DEV: '1'
+    ports:
+      - '${PUERTO_FRONTEND:-3000}:3000'
+    volumes:
+      - .:/app
+      - /app/node_modules
+      - /app/.next
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - app-network
+
+  inngest:
+    image: inngest/inngest:latest
+    restart: unless-stopped
+    command: 'inngest dev -u http://app:3000/api/inngest --host 0.0.0.0'
+    ports:
+      - '${PUERTO_INNGEST:-8288}:8288'
+    depends_on:
+      - app
+    networks:
+      - app-network
+
+volumes:
+  postgres_data:
+    driver: local
+
+networks:
+  app-network:
+    driver: bridge
