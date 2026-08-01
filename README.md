@@ -9,7 +9,7 @@ forked from **NextRag**; Docker layout aligned with **lambda/boilerplate**
 - **Next.js 15** (App Router, `output: "standalone"`)
 - **PostgreSQL 16 + pgvector** (course-isolated `documents`)
 - **Prisma** + **node-pg** for similarity queries
-- **Firebase Auth** (email/password) + Prisma `User` / `Course` / `Enrollment`
+- **Firebase Auth** (email/password + Google) + Prisma `User` / `Course` / `Enrollment`
 - **OpenAI** (`gpt-4o-mini`, `text-embedding-3-small`) via AI SDK
 - **Tailwind + shadcn/ui**
 - **pnpm**
@@ -37,9 +37,17 @@ Ports: `PUERTO_FRONTEND`, `PUERTO_POSTGRES` in `.env`.
 
 ### Firebase console (once)
 
-1. Enable **Email/Password** in Authentication → Sign-in method.
+1. Enable **Email/Password** and **Google** in Authentication → Sign-in method.
 2. Client config is hardcoded in `src/lib/firebase/client.ts` (same project for local + prod).
-3. For production domain: Authentication → Settings → **Authorized domains** → add your Coolify FQDN.
+3. Authentication → Settings → **Authorized domains**: keep `localhost`, add your Coolify FQDN for production.
+4. Sign-in uses `signInWithPopup`. If the Google popup is blocked in Coolify (third-party cookies / iframe), switch the client to `signInWithRedirect` — same provider, different entry method.
+5. Prefer the same email if linking Google ↔ password accounts (Firebase account linking).
+
+### Auth UX (hackathon)
+
+- `/register`: pick Teacher or Student, then email/password **or** Continue with Google (role applied only on first User create).
+- `/login`: email/password **or** Continue with Google (new users from login default to `STUDENT`).
+- Re-login never changes an existing `User.role`.
 
 ### Production (Coolify / Docker)
 

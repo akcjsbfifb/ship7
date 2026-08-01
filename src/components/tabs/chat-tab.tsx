@@ -16,7 +16,7 @@ type ChatTabProps = {
 };
 
 export function ChatTab({ courseId }: ChatTabProps) {
-	const { messages, input, handleInputChange, handleSubmit, data, isLoading } =
+	const { messages, input, handleInputChange, handleSubmit, data, isLoading, error } =
 		useChat({
 			api: "/api/chat",
 			body: { courseId },
@@ -29,17 +29,20 @@ export function ChatTab({ courseId }: ChatTabProps) {
 				headers.set("Authorization", `Bearer ${token}`);
 				return fetch(input, { ...init, headers });
 			},
+			onError: (err) => {
+				toast.error(err.message || "Error en el chat");
+			},
 		});
 
 	const handleChatSubmit = async (e: React.FormEvent) => {
 		e.preventDefault();
 		if (!input.trim()) {
-			toast.error("Please enter a question");
+			toast.error("Escribí una pregunta");
 			return;
 		}
 		const token = await getIdToken();
 		if (!token) {
-			toast.error("Not authenticated");
+			toast.error("No autenticado");
 			return;
 		}
 		handleSubmit(e);
@@ -48,11 +51,19 @@ export function ChatTab({ courseId }: ChatTabProps) {
 	return (
 		<Card>
 			<CardHeader>
-				<CardTitle>Tutor</CardTitle>
+				<CardTitle>Tutor del curso</CardTitle>
 			</CardHeader>
 			<CardContent>
-				<ScrollArea className="h-[480px] pr-4 mb-4">
+				<p className="text-sm text-muted-foreground mb-4">
+					Preguntá sobre el material cargado. Solo usa el RAG de este curso.
+				</p>
+				<ScrollArea className="h-[420px] pr-4 mb-4">
 					<div className="space-y-4">
+						{messages.length === 0 && (
+							<div className="text-center text-muted-foreground text-sm py-16">
+								Todavía no hay mensajes. Probá: “¿De qué trata el material?”
+							</div>
+						)}
 						{messages.map((m) => (
 							<div
 								key={m.id}
@@ -61,7 +72,7 @@ export function ChatTab({ courseId }: ChatTabProps) {
 								}`}
 							>
 								<div
-									className={`max-w-[80%] rounded-lg px-4 py-2 ${
+									className={`max-w-[85%] rounded-lg px-4 py-2 ${
 										m.role === "user"
 											? "bg-primary text-primary-foreground"
 											: "bg-muted"
@@ -76,32 +87,26 @@ export function ChatTab({ courseId }: ChatTabProps) {
 												// biome-ignore lint/suspicious/noExplicitAny: StreamData payload
 												(data[data.length - 1] as any)?.contextDetails
 													?.length > 0 && (
-													<div className="mb-4 p-2 border border-dashed rounded-md border-gray-500 text-sm opacity-75">
+													<div className="mb-3 p-2 border border-dashed rounded-md text-xs opacity-80">
 														<div className="font-semibold mb-1">
-															Context Used:
+															Contexto usado
 														</div>
 														{/* biome-ignore lint/suspicious/noExplicitAny: StreamData payload */}
-														{(data[data.length - 1] as any).contextDetails.map(
-															(
-																context: {
-																	content?: string;
-																	chunk?: string;
-																	metadata: Record<string, unknown>;
-																},
-																i: number,
-															) => (
-																<div key={i} className="mb-2">
-																	<div className="font-medium">
+														{(data[data.length - 1] as any).contextDetails
+															.slice(0, 2)
+															.map(
+																(
+																	context: {
+																		content?: string;
+																		chunk?: string;
+																	},
+																	i: number,
+																) => (
+																	<div key={i} className="mb-1 line-clamp-3">
 																		{context.content ?? context.chunk}
 																	</div>
-																	<div className="text-xs text-gray-400">
-																		Distance: {String(context.metadata.distance)}{" "}
-																		| Created:{" "}
-																		{String(context.metadata.createdAt)}
-																	</div>
-																</div>
-															),
-														)}
+																),
+															)}
 													</div>
 												)}
 											<ReactMarkdown
@@ -126,7 +131,7 @@ export function ChatTab({ courseId }: ChatTabProps) {
 														);
 													},
 												}}
-												className="prose prose-invert max-w-none"
+												className="prose dark:prose-invert max-w-none prose-sm"
 											>
 												{m.content}
 											</ReactMarkdown>
@@ -135,6 +140,11 @@ export function ChatTab({ courseId }: ChatTabProps) {
 								</div>
 							</div>
 						))}
+						{error && (
+							<p className="text-sm text-destructive text-center">
+								{error.message}
+							</p>
+						)}
 					</div>
 				</ScrollArea>
 
@@ -142,12 +152,12 @@ export function ChatTab({ courseId }: ChatTabProps) {
 					<input
 						value={input}
 						onChange={handleInputChange}
-						placeholder="Ask about this course…"
+						placeholder="Preguntá sobre el curso…"
 						className="flex-1 p-2 border rounded-md bg-background"
 						disabled={isLoading}
 					/>
 					<Button type="submit" disabled={isLoading}>
-						Send
+						{isLoading ? "…" : "Enviar"}
 					</Button>
 				</form>
 			</CardContent>

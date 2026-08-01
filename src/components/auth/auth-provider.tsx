@@ -4,6 +4,7 @@ import {
 	createUserWithEmailAndPassword,
 	onAuthStateChanged,
 	signInWithEmailAndPassword,
+	signInWithPopup,
 	signOut,
 	updateProfile,
 	type User as FirebaseUser,
@@ -18,7 +19,8 @@ import {
 	type ReactNode,
 } from "react";
 
-import { auth } from "@/lib/firebase/client";
+import { auth, googleProvider } from "@/lib/firebase/client";
+import { toAuthError } from "@/lib/auth/firebase-errors";
 
 export type AppRole = "TEACHER" | "STUDENT";
 
@@ -33,6 +35,7 @@ type AuthContextValue = {
 		name?: string;
 		role: AppRole;
 	}) => Promise<void>;
+	loginWithGoogle: (opts?: { role?: AppRole }) => Promise<void>;
 	logout: () => Promise<void>;
 	syncProfile: (opts?: {
 		role?: AppRole;
@@ -60,31 +63,39 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
 	const syncProfile = useCallback(
 		async (opts?: { role?: AppRole; name?: string }) => {
-			const token = await getIdToken();
-			if (!token) throw new Error("Not authenticated");
+			try {
+				const token = await getIdToken();
+				if (!token) throw new Error("Not authenticated");
 
-			const res = await fetch("/api/auth/sync", {
-				method: "POST",
-				headers: {
-					Authorization: `Bearer ${token}`,
-					"Content-Type": "application/json",
-				},
-				body: JSON.stringify(opts ?? {}),
-			});
+				const res = await fetch("/api/auth/sync", {
+					method: "POST",
+					headers: {
+						Authorization: `Bearer ${token}`,
+						"Content-Type": "application/json",
+					},
+					body: JSON.stringify(opts ?? {}),
+				});
 
-			const data = await res.json();
-			if (!res.ok) {
-				throw new Error(data.error || "Failed to sync profile");
+				const data = await res.json();
+				if (!res.ok) {
+					throw new Error(data.error || "No se pudo sincronizar el perfil");
+				}
+				return data.user;
+			} catch (err) {
+				throw toAuthError(err);
 			}
-			return data.user;
 		},
 		[getIdToken],
 	);
 
 	const login = useCallback(
 		async (email: string, password: string) => {
-			await signInWithEmailAndPassword(auth, email, password);
-			await syncProfile();
+			try {
+				await signInWithEmailAndPassword(auth, email, password);
+				await syncProfile();
+			} catch (err) {
+				throw toAuthError(err);
+			}
 		},
 		[syncProfile],
 	);
@@ -101,11 +112,31 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 			name?: string;
 			role: AppRole;
 		}) => {
-			const cred = await createUserWithEmailAndPassword(auth, email, password);
-			if (name?.trim()) {
-				await updateProfile(cred.user, { displayName: name.trim() });
+			try {
+				const cred = await createUserWithEmailAndPassword(auth, email, password);
+				if (name?.trim()) {
+					await updateProfile(cred.user, { displayName: name.trim() });
+				}
+				await syncProfile({ role, name: name?.trim() });
+			} catch (err) {
+				throw toAuthError(err);
 			}
-			await syncProfile({ role, name: name?.trim() });
+		},
+		[syncProfile],
+	);
+
+	const loginWithGoogle = useCallback(
+		async (opts?: { role?: AppRole }) => {
+			try {
+				const result = await signInWithPopup(auth, googleProvider);
+				const name = result.user.displayName?.trim() || undefined;
+				await syncProfile({
+					...(opts?.role ? { role: opts.role } : {}),
+					...(name ? { name } : {}),
+				});
+			} catch (err) {
+				throw toAuthError(err);
+			}
 		},
 		[syncProfile],
 	);
@@ -121,10 +152,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 			getIdToken,
 			login,
 			register,
+			loginWithGoogle,
 			logout,
 			syncProfile,
 		}),
-		[firebaseUser, loading, getIdToken, login, register, logout, syncProfile],
+		[
+			firebaseUser,
+			loading,
+			getIdToken,
+			login,
+			register,
+			loginWithGoogle,
+			logout,
+			syncProfile,
+		],
 	);
 
 	return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

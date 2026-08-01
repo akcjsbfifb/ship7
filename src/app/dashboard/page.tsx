@@ -32,9 +32,10 @@ type MeResponse = {
 };
 
 export default function DashboardPage() {
-	const { firebaseUser, loading } = useAuth();
+	const { firebaseUser, loading, syncProfile } = useAuth();
 	const router = useRouter();
 	const [me, setMe] = useState<MeResponse | null>(null);
+	const [error, setError] = useState<string | null>(null);
 	const [title, setTitle] = useState("");
 	const [description, setDescription] = useState("");
 	const [inviteCode, setInviteCode] = useState("");
@@ -42,13 +43,16 @@ export default function DashboardPage() {
 
 	const load = useCallback(async () => {
 		try {
+			setError(null);
 			const res = await authFetch("/api/me");
 			const data = await res.json();
 			if (!res.ok) throw new Error(data.error || "Failed to load");
 			setMe(data);
 		} catch (err) {
 			console.error(err);
-			toast.error(err instanceof Error ? err.message : "Failed to load profile");
+			const msg = err instanceof Error ? err.message : "Failed to load profile";
+			setError(msg);
+			toast.error(msg);
 		}
 	}, []);
 
@@ -61,6 +65,19 @@ export default function DashboardPage() {
 		void load();
 	}, [firebaseUser, loading, load, router]);
 
+	const becomeTeacher = async () => {
+		setBusy(true);
+		try {
+			await syncProfile({ role: "TEACHER" });
+			toast.success("Ahora sos profesor");
+			await load();
+		} catch (err) {
+			toast.error(err instanceof Error ? err.message : "No se pudo cambiar el rol");
+		} finally {
+			setBusy(false);
+		}
+	};
+
 	const createCourse = async (e: React.FormEvent) => {
 		e.preventDefault();
 		setBusy(true);
@@ -71,10 +88,8 @@ export default function DashboardPage() {
 			});
 			const data = await res.json();
 			if (!res.ok) throw new Error(data.error || "Failed to create course");
-			toast.success("Course created");
-			setTitle("");
-			setDescription("");
-			await load();
+			toast.success("Curso creado");
+			router.push(`/courses/${data.course.id}`);
 		} catch (err) {
 			toast.error(err instanceof Error ? err.message : "Create failed");
 		} finally {
@@ -92,9 +107,8 @@ export default function DashboardPage() {
 			});
 			const data = await res.json();
 			if (!res.ok) throw new Error(data.error || "Failed to join");
-			toast.success(`Joined ${data.course?.title ?? "course"}`);
-			setInviteCode("");
-			await load();
+			toast.success(`Te uniste a ${data.course?.title ?? "el curso"}`);
+			router.push(`/courses/${data.course.id}`);
 		} catch (err) {
 			toast.error(err instanceof Error ? err.message : "Join failed");
 		} finally {
@@ -102,99 +116,149 @@ export default function DashboardPage() {
 		}
 	};
 
-	if (loading || !me) {
+	if (loading) {
 		return (
 			<div className="min-h-screen flex flex-col">
 				<Navbar />
 				<main className="flex-1 flex items-center justify-center text-muted-foreground">
-					Loading…
+					Cargando…
+				</main>
+			</div>
+		);
+	}
+
+	if (error && !me) {
+		return (
+			<div className="min-h-screen flex flex-col">
+				<Navbar />
+				<main className="flex-1 flex flex-col items-center justify-center gap-4 px-4">
+					<p className="text-muted-foreground text-center">{error}</p>
+					<Button onClick={() => void load()}>Reintentar</Button>
+				</main>
+			</div>
+		);
+	}
+
+	if (!me) {
+		return (
+			<div className="min-h-screen flex flex-col">
+				<Navbar />
+				<main className="flex-1 flex items-center justify-center text-muted-foreground">
+					Cargando…
 				</main>
 			</div>
 		);
 	}
 
 	const isTeacher = me.user.role === "TEACHER";
-	const courses = isTeacher ? me.owned : me.enrolled;
+	const courses = [
+		...me.owned.map((c) => ({ ...c, kind: "owned" as const })),
+		...me.enrolled.map((c) => ({ ...c, kind: "enrolled" as const })),
+	];
 
 	return (
 		<div className="min-h-screen flex flex-col">
 			<Navbar />
 			<main className="flex-1 max-w-4xl mx-auto w-full px-4 py-10 space-y-8">
 				<div>
-					<h1 className="text-3xl font-bold tracking-tight font-mono">Dashboard</h1>
+					<h1 className="text-3xl font-bold tracking-tight font-mono">Cursos</h1>
 					<p className="text-muted-foreground mt-1">
-						{me.user.name || me.user.email} · {me.user.role.toLowerCase()}
+						{me.user.name || me.user.email} ·{" "}
+						{isTeacher ? "profesor" : "alumno"}
 					</p>
 				</div>
 
-				{isTeacher ? (
+				{!isTeacher && (
 					<Card>
 						<CardHeader>
-							<CardTitle>Create course</CardTitle>
+							<CardTitle>¿Querés crear cursos?</CardTitle>
+						</CardHeader>
+						<CardContent className="space-y-3">
+							<p className="text-sm text-muted-foreground">
+								Tu cuenta está como alumno. Podés pasarte a profesor para crear
+								cursos y cargar material al RAG.
+							</p>
+							<Button onClick={becomeTeacher} disabled={busy}>
+								Convertirme en profesor
+							</Button>
+						</CardContent>
+					</Card>
+				)}
+
+				{isTeacher && (
+					<Card>
+						<CardHeader>
+							<CardTitle>Crear curso</CardTitle>
 						</CardHeader>
 						<CardContent>
 							<form onSubmit={createCourse} className="space-y-3">
 								<Input
-									placeholder="Course title"
+									placeholder="Título del curso"
 									value={title}
 									onChange={(e) => setTitle(e.target.value)}
 									required
 								/>
 								<Textarea
-									placeholder="Description (optional)"
+									placeholder="Descripción (opcional)"
 									value={description}
 									onChange={(e) => setDescription(e.target.value)}
 								/>
 								<Button type="submit" disabled={busy}>
-									Create
-								</Button>
-							</form>
-						</CardContent>
-					</Card>
-				) : (
-					<Card>
-						<CardHeader>
-							<CardTitle>Join with invite code</CardTitle>
-						</CardHeader>
-						<CardContent>
-							<form onSubmit={joinCourse} className="flex flex-col sm:flex-row gap-2">
-								<Input
-									placeholder="Invite code"
-									value={inviteCode}
-									onChange={(e) => setInviteCode(e.target.value)}
-									required
-								/>
-								<Button type="submit" disabled={busy}>
-									Join
+									Crear y abrir
 								</Button>
 							</form>
 						</CardContent>
 					</Card>
 				)}
 
+				<Card>
+					<CardHeader>
+						<CardTitle>Unirse con código</CardTitle>
+					</CardHeader>
+					<CardContent>
+						<p className="text-sm text-muted-foreground mb-3">
+							Pedile el código de invitación al profesor.
+						</p>
+						<form onSubmit={joinCourse} className="flex flex-col sm:flex-row gap-2">
+							<Input
+								placeholder="Código de invitación"
+								value={inviteCode}
+								onChange={(e) => setInviteCode(e.target.value)}
+								required
+							/>
+							<Button type="submit" disabled={busy}>
+								Unirme
+							</Button>
+						</form>
+					</CardContent>
+				</Card>
+
 				<section className="space-y-3">
-					<h2 className="text-xl font-semibold">Your courses</h2>
+					<h2 className="text-xl font-semibold">Mis cursos</h2>
 					{courses.length === 0 ? (
 						<p className="text-muted-foreground text-sm">
 							{isTeacher
-								? "No courses yet — create one above."
-								: "No enrollments yet — join with a code."}
+								? "Todavía no tenés cursos. Creá uno arriba."
+								: "Todavía no estás en ningún curso. Unite con un código."}
 						</p>
 					) : (
 						<div className="grid gap-3">
 							{courses.map((course) => (
-								<Link key={course.id} href={`/courses/${course.id}`}>
+								<Link key={`${course.kind}-${course.id}`} href={`/courses/${course.id}`}>
 									<Card className="hover:border-primary/50 transition-colors">
 										<CardContent className="py-4 flex items-center justify-between gap-4">
 											<div>
 												<div className="font-medium">{course.title}</div>
-												{course.description && (
-													<div className="text-sm text-muted-foreground line-clamp-1">
-														{course.description}
-													</div>
-												)}
+												<div className="text-sm text-muted-foreground">
+													{course.kind === "owned"
+														? "Sos el profesor · Material + Tutor"
+														: "Inscripto · Tutor"}
+													{course.description
+														? ` · ${course.description}`
+														: ""}
+												</div>
 											</div>
-											{isTeacher && (
+											{course.kind === "owned" && (
 												<code className="text-xs bg-muted px-2 py-1 rounded shrink-0">
 													{course.inviteCode}
 												</code>
