@@ -1,9 +1,10 @@
 "use client";
 
 import { useAuth } from "@/components/auth/auth-provider";
+import { ClassroomPanel } from "@/components/course/classroom-panel";
+import { ChatbotPanel } from "@/components/course/chatbot-panel";
+import { StudentsPanel } from "@/components/course/students-panel";
 import { Navbar } from "@/components/navbar";
-import { ChatTab } from "@/components/tabs/chat-tab";
-import { IngestTab } from "@/components/tabs/ingest-tab";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -23,10 +24,7 @@ type Course = {
 };
 
 type MeResponse = {
-	user: {
-		id: string;
-		role: "TEACHER" | "STUDENT";
-	};
+	user: { id: string; role: "TEACHER" | "STUDENT" };
 	owned: Course[];
 	enrolled: Course[];
 };
@@ -59,7 +57,6 @@ export default function CoursePage() {
 			setCourse(found);
 			setIsTeacher(Boolean(owned));
 		} catch (err) {
-			console.error(err);
 			const msg = err instanceof Error ? err.message : "Failed to load course";
 			setLoadError(msg);
 			toast.error(msg);
@@ -99,7 +96,7 @@ export default function CoursePage() {
 		}
 	};
 
-	if (loading) {
+	if (loading || (!course && !loadError)) {
 		return (
 			<div className="min-h-screen flex flex-col">
 				<Navbar />
@@ -127,21 +124,14 @@ export default function CoursePage() {
 		);
 	}
 
-	if (!course) {
-		return (
-			<div className="min-h-screen flex flex-col">
-				<Navbar />
-				<main className="flex-1 flex items-center justify-center text-muted-foreground">
-					Cargando…
-				</main>
-			</div>
-		);
-	}
+	if (!course) return null;
+
+	const defaultTab = isTeacher ? "material" : "chat";
 
 	return (
 		<div className="min-h-screen flex flex-col">
 			<Navbar />
-			<main className="flex-1 max-w-4xl mx-auto w-full px-4 py-8 space-y-6">
+			<main className="flex-1 max-w-6xl mx-auto w-full px-4 py-8 space-y-6">
 				<div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
 					<div>
 						<Link
@@ -154,11 +144,6 @@ export default function CoursePage() {
 						{course.description && (
 							<p className="text-muted-foreground mt-1">{course.description}</p>
 						)}
-						<p className="text-sm text-muted-foreground mt-2">
-							{isTeacher
-								? "Como profesor: cargá material al RAG y probá el tutor."
-								: "Como alumno: preguntale al tutor sobre el material del curso."}
-						</p>
 					</div>
 					{isTeacher && (
 						<Card className="p-4 space-y-2 min-w-[240px]">
@@ -185,36 +170,29 @@ export default function CoursePage() {
 					)}
 				</div>
 
-				<Card className="p-1">
-					<Tabs
-						defaultValue={isTeacher ? "ingest" : "chat"}
-						className="space-y-4"
+				<Tabs defaultValue={defaultTab} className="space-y-4">
+					<TabsList
+						className={`grid w-full p-1 ${isTeacher ? "grid-cols-3" : "grid-cols-2"}`}
 					>
-						<TabsList
-							className={`grid w-full p-1 ${isTeacher ? "grid-cols-2" : "grid-cols-1"}`}
-						>
-							{isTeacher && (
-								<TabsTrigger value="ingest" className="font-medium">
-									Material (RAG)
-								</TabsTrigger>
-							)}
-							<TabsTrigger value="chat" className="font-medium">
-								Tutor (chat)
-							</TabsTrigger>
-						</TabsList>
+						{isTeacher && (
+							<TabsTrigger value="students">Alumnos</TabsTrigger>
+						)}
+						<TabsTrigger value="material">Material</TabsTrigger>
+						<TabsTrigger value="chat">Chatbot</TabsTrigger>
+					</TabsList>
 
-						<div className="p-4 min-h-[520px]">
-							{isTeacher && (
-								<TabsContent value="ingest" className="m-0">
-									<IngestTab courseId={course.id} />
-								</TabsContent>
-							)}
-							<TabsContent value="chat" className="m-0">
-								<ChatTab courseId={course.id} />
-							</TabsContent>
-						</div>
-					</Tabs>
-				</Card>
+					{isTeacher && (
+						<TabsContent value="students" className="mt-0">
+							<StudentsPanel courseId={course.id} />
+						</TabsContent>
+					)}
+					<TabsContent value="material" className="mt-0">
+						<ClassroomPanel courseId={course.id} isTeacher={isTeacher} />
+					</TabsContent>
+					<TabsContent value="chat" className="mt-0">
+						<ChatbotPanel courseId={course.id} isTeacher={isTeacher} />
+					</TabsContent>
+				</Tabs>
 			</main>
 		</div>
 	);

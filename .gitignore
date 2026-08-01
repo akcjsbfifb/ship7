@@ -49,5 +49,9 @@ postgres_data_prod
 # docker
 .docker
 
+# uploads (local driver)
+/data
+/data/uploads
+
 # firebase
 firebase-service-account.json

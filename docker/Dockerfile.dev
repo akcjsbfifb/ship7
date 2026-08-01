@@ -4,7 +4,10 @@ RUN --network=host npm install -g pnpm@10.14.0
 
 WORKDIR /app
 
-RUN apk add --no-cache libc6-compat openssl
+RUN apk add --no-cache libc6-compat openssl python3 py3-pip \
+  && pip3 install --break-system-packages --no-cache-dir 'markitdown[all]' \
+  || pip3 install --break-system-packages --no-cache-dir markitdown
+
 
 COPY package.json pnpm-lock.yaml ./
 RUN --network=host --mount=type=cache,target=/root/.local/share/pnpm/store \

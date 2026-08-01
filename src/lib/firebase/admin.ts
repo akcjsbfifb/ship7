@@ -3,6 +3,10 @@ import { join } from 'path';
 
 import { cert, getApp, getApps, initializeApp } from 'firebase-admin/app';
 import { getAuth } from 'firebase-admin/auth';
+import { getStorage } from 'firebase-admin/storage';
+
+const STORAGE_BUCKET =
+  process.env.FIREBASE_STORAGE_BUCKET || 'ship7-a8c70.firebasestorage.app';
 
 function initAdmin() {
   if (getApps().length) return getApp();
@@ -12,9 +16,12 @@ function initAdmin() {
   let privateKey = process.env.FIREBASE_PRIVATE_KEY;
   if (privateKey) privateKey = privateKey.replace(/\\n/g, '\n');
 
+  const common = { storageBucket: STORAGE_BUCKET };
+
   if (projectId && clientEmail && privateKey) {
     return initializeApp({
       credential: cert({ projectId, clientEmail, privateKey }),
+      ...common,
     });
   }
 
@@ -25,6 +32,7 @@ function initAdmin() {
     const sa = JSON.parse(readFileSync(credPath, 'utf8'));
     return initializeApp({
       credential: cert(sa),
+      ...common,
     });
   }
 
@@ -37,4 +45,9 @@ export function getAdminApp() {
 
 export function getAdminAuth() {
   return getAuth(getAdminApp());
+}
+
+export function getAdminBucket() {
+  getAdminApp();
+  return getStorage().bucket(STORAGE_BUCKET);
 }
