@@ -11,7 +11,7 @@ import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
 export default function RegisterPage() {
-	const { register, firebaseUser, loading } = useAuth();
+	const { register, loginWithGoogle, firebaseUser, loading } = useAuth();
 	const router = useRouter();
 	const [email, setEmail] = useState("");
 	const [password, setPassword] = useState("");
@@ -30,11 +30,23 @@ export default function RegisterPage() {
 		setSubmitting(true);
 		try {
 			await register({ email, password, name, role });
-			toast.success("Account created");
+			toast.success("Cuenta creada");
 			router.push("/dashboard");
 		} catch (err) {
-			console.error(err);
-			toast.error(err instanceof Error ? err.message : "Registration failed");
+			toast.error(err instanceof Error ? err.message : "No se pudo registrar");
+		} finally {
+			setSubmitting(false);
+		}
+	};
+
+	const handleGoogle = async () => {
+		setSubmitting(true);
+		try {
+			await loginWithGoogle({ role });
+			toast.success("Listo");
+			router.push("/dashboard");
+		} catch (err) {
+			toast.error(err instanceof Error ? err.message : "No se pudo entrar con Google");
 		} finally {
 			setSubmitting(false);
 		}
@@ -48,7 +60,7 @@ export default function RegisterPage() {
 					<CardHeader>
 						<CardTitle className="font-mono text-2xl">Create account</CardTitle>
 					</CardHeader>
-					<CardContent>
+					<CardContent className="space-y-4">
 						<form onSubmit={handleSubmit} className="space-y-4">
 							<Input
 								placeholder="Name (optional)"
@@ -93,7 +105,28 @@ export default function RegisterPage() {
 								{submitting ? "Creating…" : "Register"}
 							</Button>
 						</form>
-						<p className="mt-4 text-sm text-muted-foreground text-center">
+						<div className="relative">
+							<div className="absolute inset-0 flex items-center">
+								<span className="w-full border-t" />
+							</div>
+							<div className="relative flex justify-center text-xs uppercase">
+								<span className="bg-card px-2 text-muted-foreground">or</span>
+							</div>
+						</div>
+						<Button
+							type="button"
+							variant="outline"
+							className="w-full"
+							disabled={submitting}
+							onClick={handleGoogle}
+						>
+							Continue with Google
+						</Button>
+						<p className="text-xs text-muted-foreground text-center">
+							Google uses the role selected above (Teacher / Student) on first
+							sign-in only.
+						</p>
+						<p className="text-sm text-muted-foreground text-center">
 							Already have an account?{" "}
 							<Link href="/login" className="text-primary underline-offset-4 hover:underline">
 								Log in

@@ -19,6 +19,7 @@
   },
   "dependencies": {
     "@ai-sdk/openai": "^0.0.72",
+    "@google-cloud/storage": "^7.21.0",
     "@prisma/client": "5.22.0",
     "@radix-ui/react-dropdown-menu": "^2.1.2",
     "@radix-ui/react-scroll-area": "^1.2.1",

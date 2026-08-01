@@ -11,7 +11,7 @@ import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
 export default function LoginPage() {
-	const { login, firebaseUser, loading } = useAuth();
+	const { login, loginWithGoogle, firebaseUser, loading } = useAuth();
 	const router = useRouter();
 	const [email, setEmail] = useState("");
 	const [password, setPassword] = useState("");
@@ -28,11 +28,23 @@ export default function LoginPage() {
 		setSubmitting(true);
 		try {
 			await login(email, password);
-			toast.success("Welcome back");
+			toast.success("Bienvenido");
 			router.push("/dashboard");
 		} catch (err) {
-			console.error(err);
-			toast.error(err instanceof Error ? err.message : "Login failed");
+			toast.error(err instanceof Error ? err.message : "No se pudo iniciar sesión");
+		} finally {
+			setSubmitting(false);
+		}
+	};
+
+	const handleGoogle = async () => {
+		setSubmitting(true);
+		try {
+			await loginWithGoogle();
+			toast.success("Bienvenido");
+			router.push("/dashboard");
+		} catch (err) {
+			toast.error(err instanceof Error ? err.message : "No se pudo entrar con Google");
 		} finally {
 			setSubmitting(false);
 		}
@@ -46,7 +58,7 @@ export default function LoginPage() {
 					<CardHeader>
 						<CardTitle className="font-mono text-2xl">Log in</CardTitle>
 					</CardHeader>
-					<CardContent>
+					<CardContent className="space-y-4">
 						<form onSubmit={handleSubmit} className="space-y-4">
 							<Input
 								type="email"
@@ -66,7 +78,24 @@ export default function LoginPage() {
 								{submitting ? "Signing in…" : "Sign in"}
 							</Button>
 						</form>
-						<p className="mt-4 text-sm text-muted-foreground text-center">
+						<div className="relative">
+							<div className="absolute inset-0 flex items-center">
+								<span className="w-full border-t" />
+							</div>
+							<div className="relative flex justify-center text-xs uppercase">
+								<span className="bg-card px-2 text-muted-foreground">or</span>
+							</div>
+						</div>
+						<Button
+							type="button"
+							variant="outline"
+							className="w-full"
+							disabled={submitting}
+							onClick={handleGoogle}
+						>
+							Continue with Google
+						</Button>
+						<p className="text-sm text-muted-foreground text-center">
 							No account?{" "}
 							<Link href="/register" className="text-primary underline-offset-4 hover:underline">
 								Register

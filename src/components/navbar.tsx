@@ -8,8 +8,7 @@ import { usePathname, useRouter } from "next/navigation";
 
 const navItems = [
 	{ href: "/", label: "Home" },
-	{ href: "/dashboard", label: "Courses" },
-	{ href: "/docs", label: "Docs" },
+	{ href: "/dashboard", label: "Cursos" },
 ];
 
 export function Navbar() {

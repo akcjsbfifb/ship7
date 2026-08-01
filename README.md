@@ -1,98 +1,76 @@
 # EduAI (ship7)
 
 Hackathon boilerplate for an interactive education platform. File structure
-forked from **NextRag**; Docker layout aligned with **lambda/boilerplate**
-(`docker-compose.yml` + `docker-compose.prod.yml`).
+forked from **NextRag**; Docker layout aligned with **lambda/boilerplate**.
 
 ## Stack
 
 - **Next.js 15** (App Router, `output: "standalone"`)
 - **PostgreSQL 16 + pgvector** (course-isolated `documents`)
-- **Prisma** + **node-pg** for similarity queries
-- **Firebase Auth** (email/password) + Prisma `User` / `Course` / `Enrollment`
-- **OpenAI** (`gpt-4o-mini`, `text-embedding-3-small`) via AI SDK
-- **Tailwind + shadcn/ui**
-- **pnpm**
+- **Firebase Auth** (email/password + Google) + Storage for course files
+- **Prisma**: `User`, `Course`, `Enrollment`, `CourseTopic`, `Material`, `ChatThread`, `ChatMessage`
+- **markitdown** (Python CLI in Docker) → text for RAG
+- **OpenAI** via AI SDK
 
 ## Quick start
 
 ```bash
 cp .env.example .env
-# set OPENAI_API_KEY in .env
-
-# Firebase Admin (local): place service account at project root
-# firebase-service-account.json  (gitignored)
-# or set GOOGLE_APPLICATION_CREDENTIALS=./firebase-service-account.json
+# set OPENAI_API_KEY
+# place firebase-service-account.json at repo root (gitignored)
 
 docker compose up -d --build
 ```
 
-| Service    | URL                            |
-|------------|--------------------------------|
-| App        | http://localhost:3000          |
-| Dashboard  | http://localhost:3000/dashboard|
-| Postgres   | localhost:5432                 |
+| Service   | URL                             |
+|-----------|---------------------------------|
+| App       | http://localhost:3000           |
+| Dashboard | http://localhost:3000/dashboard |
 
-Ports: `PUERTO_FRONTEND`, `PUERTO_POSTGRES` in `.env`.
+Dev compose defaults `UPLOAD_DRIVER=local` (volume `/data/uploads`). Prod defaults to Firebase Storage.
 
-### Firebase console (once)
+### Firebase console
 
-1. Enable **Email/Password** in Authentication → Sign-in method.
-2. Client config is hardcoded in `src/lib/firebase/client.ts` (same project for local + prod).
-3. For production domain: Authentication → Settings → **Authorized domains** → add your Coolify FQDN.
+1. Auth: Email/Password + Google. Authorized domains: `localhost` + Coolify FQDN.
+### Firebase Storage rules (pegar en Console → Storage → Rules)
 
-### Production (Coolify / Docker)
+```
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    // Lectura para usuarios autenticados (links firmados / client SDK)
+    // Escritura solo desde el servidor (Firebase Admin) — las rules no aplican al Admin SDK
+    match /courses/{courseId}/{allPaths=**} {
+      allow read: if request.auth != null;
+      allow write: if false;
+    }
+  }
+}
+```
 
-Do **not** bake the service account JSON into the image. Set these env vars in Coolify (same Firebase project as local):
+Env para usar Storage en todos lados:
 
 ```bash
-FIREBASE_PROJECT_ID=ship7-a8c70
-FIREBASE_CLIENT_EMAIL=firebase-adminsdk-fbsvc@ship7-a8c70.iam.gserviceaccount.com
-FIREBASE_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\n...\n-----END PRIVATE KEY-----\n"
+UPLOAD_DRIVER=firebase
+FIREBASE_STORAGE_BUCKET=ship7-a8c70.firebasestorage.app
+GOOGLE_APPLICATION_CREDENTIALS=./firebase-service-account.json
+# o FIREBASE_PROJECT_ID + FIREBASE_CLIENT_EMAIL + FIREBASE_PRIVATE_KEY
 ```
 
-Copy values from `firebase-service-account.json`:
-- `project_id` → `FIREBASE_PROJECT_ID`
-- `client_email` → `FIREBASE_CLIENT_EMAIL`
-- `private_key` → `FIREBASE_PRIVATE_KEY` (keep `\n` escaped as a single-line string in Coolify)
+Si el upload falla con 403: en Google Cloud Console → IAM, al service account `firebase-adminsdk-...@ship7-a8c70.iam.gserviceaccount.com` asigná el rol **Storage Object Admin** (o Storage Admin) sobre el proyecto/bucket.
 
-Also set `OPENAI_API_KEY` and Postgres vars as before.
+### Fallback: persistent volume (Coolify)
 
-```bash
-docker compose -f docker-compose.prod.yml up -d --build
-```
+Solo si no usás Firebase Storage:
 
-Migrations run on container start (same pattern as lambda/boilerplate API entrypoint).
-
-## Auth + courses
-
-- Roles: `TEACHER` | `STUDENT` (stored in Prisma `User.role`)
-- Teacher creates courses → gets `inviteCode`
-- Student joins with `POST /api/courses/join`
-- All RAG routes (`/api/ingest`, `/api/search`, `/api/chat`) require Bearer Firebase ID token + course membership
-- Ingest / rotate invite: teacher only
-
-## Docker layout (mirrors lambda/boilerplate)
-
-```
-├── docker-compose.yml          # Development (bind mount + hot reload)
-├── docker-compose.prod.yml     # Production build
-├── docker/
-│   ├── Dockerfile.dev
-│   ├── Dockerfile.prod
-│   ├── entrypoint.dev.sh
-│   ├── entrypoint.prod.sh
-│   └── init/01-pgvector.sql
-├── firebase-service-account.json  # local only, gitignored
-```
+1. Coolify → app → Persistent Storage → mount `/data/uploads`
+2. `UPLOAD_DRIVER=local` + `UPLOAD_DIR=/data/uploads`
 
 ## Commands
 
 ```bash
 docker compose up -d --build
-docker compose -f docker-compose.prod.yml up -d --build
 docker compose logs -f app
-docker compose exec app npx prisma studio
 docker compose exec app npx prisma migrate deploy
 ```
 

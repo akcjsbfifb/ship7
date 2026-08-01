@@ -47,8 +47,13 @@ services:
       FIREBASE_CLIENT_EMAIL: ${FIREBASE_CLIENT_EMAIL:-}
       FIREBASE_PRIVATE_KEY: ${FIREBASE_PRIVATE_KEY:-}
       GOOGLE_APPLICATION_CREDENTIALS: ${GOOGLE_APPLICATION_CREDENTIALS:-}
+      FIREBASE_STORAGE_BUCKET: ${FIREBASE_STORAGE_BUCKET:-ship7-a8c70.firebasestorage.app}
+      UPLOAD_DRIVER: ${UPLOAD_DRIVER:-firebase}
+      UPLOAD_DIR: ${UPLOAD_DIR:-/data/uploads}
     ports:
       - '${PUERTO_FRONTEND:-3000}:3000'
+    volumes:
+      - uploads_data:/data/uploads
     depends_on:
       postgres:
         condition: service_healthy
@@ -67,6 +72,8 @@ services:
 
 volumes:
   postgres_data:
+    driver: local
+  uploads_data:
     driver: local
 
 networks:

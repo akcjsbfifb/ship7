@@ -10,19 +10,32 @@ const VALID_ROLES: Role[] = ['TEACHER', 'STUDENT'];
 export async function POST(req: Request) {
   try {
     const body = await req.json().catch(() => ({}));
-    const roleOnCreate =
-      body.role && VALID_ROLES.includes(body.role) ? body.role : 'STUDENT';
+    const requestedRole: Role | undefined =
+      body.role && VALID_ROLES.includes(body.role) ? body.role : undefined;
 
-    const { user: initialUser } = await requireUser(req, { roleOnCreate });
+    // roleOnCreate only matters for brand-new users when no explicit role is sent
+    const { user: initialUser } = await requireUser(req, {
+      roleOnCreate: requestedRole ?? 'STUDENT',
+    });
 
-    let user = initialUser;
+    const data: { name?: string; role?: Role } = {};
 
     if (typeof body.name === 'string' && body.name.trim()) {
-      user = await prisma.user.update({
-        where: { id: initialUser.id },
-        data: { name: body.name.trim() },
-      });
+      data.name = body.name.trim();
     }
+
+    // If the client explicitly sends a role (register / "ser profesor"), apply it
+    if (requestedRole) {
+      data.role = requestedRole;
+    }
+
+    const user =
+      Object.keys(data).length > 0
+        ? await prisma.user.update({
+            where: { id: initialUser.id },
+            data,
+          })
+        : initialUser;
 
     return NextResponse.json({ user });
   } catch (error) {

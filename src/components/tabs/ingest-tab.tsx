@@ -15,15 +15,16 @@ type IngestTabProps = {
 export function IngestTab({ courseId }: IngestTabProps) {
 	const [text, setText] = useState("");
 	const [loading, setLoading] = useState(false);
+	const [lastChunks, setLastChunks] = useState<number | null>(null);
 
 	const handleEmbed = async () => {
-		if (!text) {
-			toast.error("Please enter some text to embed");
+		if (!text.trim()) {
+			toast.error("Pegá algún texto del curso");
 			return;
 		}
 
 		setLoading(true);
-		const toastId = toast.loading("Embedding with OpenAI...");
+		const toastId = toast.loading("Indexando en el RAG…");
 
 		try {
 			const response = await authFetch("/api/ingest", {
@@ -40,7 +41,9 @@ export function IngestTab({ courseId }: IngestTabProps) {
 				throw new Error(data.error || "Failed to ingest");
 			}
 
-			toast.success(`Stored ${data.chunks ?? "?"} chunks`, { id: toastId });
+			const chunks = Number(data.chunks ?? 0);
+			setLastChunks(chunks);
+			toast.success(`Guardados ${chunks} chunks en este curso`, { id: toastId });
 			setText("");
 		} catch (error) {
 			console.error("Failed to process:", error);
@@ -56,28 +59,34 @@ export function IngestTab({ courseId }: IngestTabProps) {
 	return (
 		<Card>
 			<CardHeader>
-				<CardTitle>Add Knowledge</CardTitle>
+				<CardTitle>Cargar material</CardTitle>
 			</CardHeader>
 			<CardContent className="space-y-4">
-				<p className="text-sm text-muted-foreground font-mono">
-					course · {courseId}
+				<p className="text-sm text-muted-foreground">
+					Pegá apuntes o texto de un PDF. Queda aislado a este curso y el tutor
+					lo usa para responder.
 				</p>
 				<Textarea
 					value={text}
 					onChange={(e) => setText(e.target.value)}
-					placeholder="Paste course notes / PDF text here..."
-					className="min-h-[200px]"
+					placeholder="Ej: La fotosíntesis es el proceso por el cual…"
+					className="min-h-[240px]"
 				/>
 				<Button onClick={handleEmbed} disabled={loading} className="w-full">
 					{loading ? (
 						<>
 							<Loader2 className="mr-2 h-4 w-4 animate-spin" />
-							Processing...
+							Procesando…
 						</>
 					) : (
-						"Add to Course Knowledge Base"
+						"Agregar al conocimiento del curso"
 					)}
 				</Button>
+				{lastChunks !== null && (
+					<p className="text-xs text-muted-foreground text-center">
+						Última carga: {lastChunks} chunks. Probá el tab Tutor.
+					</p>
+				)}
 			</CardContent>
 		</Card>
 	);
