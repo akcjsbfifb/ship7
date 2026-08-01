@@ -2,13 +2,19 @@ import { documentsVectorDB } from '@/lib/db/vector';
 import { DB_CONFIG } from '@/lib/db/config';
 import { NextResponse } from 'next/server';
 
+import { handleError } from '@/lib/auth/http';
+import { requireCourseAccess } from '@/lib/auth/require-course-access';
+import { requireUser } from '@/lib/auth/require-user';
+
 export const maxDuration = 60;
 
 export async function POST(req: Request) {
   try {
+    const { user } = await requireUser(req);
+
     const {
       text,
-      courseId = 'demo-course',
+      courseId,
       chunkingMethod = DB_CONFIG.chunking.defaultMethod,
       metadata = {},
     } = await req.json();
@@ -24,6 +30,8 @@ export async function POST(req: Request) {
       );
     }
 
+    await requireCourseAccess(user, courseId, { teacherOnly: true });
+
     const result = await documentsVectorDB.addText(text, {
       courseId,
       chunkingMethod,
@@ -36,10 +44,6 @@ export async function POST(req: Request) {
       chunks: result.count,
     });
   } catch (error) {
-    console.error('Ingest error:', error);
-    return NextResponse.json(
-      { error: 'Failed to embed and store text' },
-      { status: 500 }
-    );
+    return handleError(error);
   }
 }

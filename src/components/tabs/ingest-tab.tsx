@@ -2,17 +2,18 @@
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { authFetch } from "@/lib/auth/client-api";
 import { Loader2 } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 
-const DEFAULT_COURSE_ID = "demo-course";
+type IngestTabProps = {
+	courseId: string;
+};
 
-export function IngestTab() {
+export function IngestTab({ courseId }: IngestTabProps) {
 	const [text, setText] = useState("");
-	const [courseId, setCourseId] = useState(DEFAULT_COURSE_ID);
 	const [loading, setLoading] = useState(false);
 
 	const handleEmbed = async () => {
@@ -20,21 +21,16 @@ export function IngestTab() {
 			toast.error("Please enter some text to embed");
 			return;
 		}
-		if (!courseId.trim()) {
-			toast.error("courseId is required for isolation");
-			return;
-		}
 
 		setLoading(true);
 		const toastId = toast.loading("Embedding with OpenAI...");
 
 		try {
-			const response = await fetch("/api/ingest", {
+			const response = await authFetch("/api/ingest", {
 				method: "POST",
-				headers: { "Content-Type": "application/json" },
 				body: JSON.stringify({
 					text,
-					courseId: courseId.trim(),
+					courseId,
 					chunkingMethod: "paragraph",
 				}),
 			});
@@ -44,14 +40,14 @@ export function IngestTab() {
 				throw new Error(data.error || "Failed to ingest");
 			}
 
-			toast.success(
-				`Stored ${data.chunks ?? "?"} chunks for course ${courseId.trim()}`,
-				{ id: toastId },
-			);
+			toast.success(`Stored ${data.chunks ?? "?"} chunks`, { id: toastId });
 			setText("");
 		} catch (error) {
 			console.error("Failed to process:", error);
-			toast.error("Failed to process text. Please try again.", { id: toastId });
+			toast.error(
+				error instanceof Error ? error.message : "Failed to process text",
+				{ id: toastId },
+			);
 		} finally {
 			setLoading(false);
 		}
@@ -63,11 +59,9 @@ export function IngestTab() {
 				<CardTitle>Add Knowledge</CardTitle>
 			</CardHeader>
 			<CardContent className="space-y-4">
-				<Input
-					value={courseId}
-					onChange={(e) => setCourseId(e.target.value)}
-					placeholder="courseId (isolation key)"
-				/>
+				<p className="text-sm text-muted-foreground font-mono">
+					course · {courseId}
+				</p>
 				<Textarea
 					value={text}
 					onChange={(e) => setText(e.target.value)}

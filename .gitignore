@@ -48,3 +48,6 @@ postgres_data_prod
 
 # docker
 .docker
+
+# firebase
+firebase-service-account.json

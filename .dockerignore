@@ -1,0 +1,12 @@
+node_modules
+.next
+.git
+.env
+.env.*
+!.env.example
+firebase-service-account.json
+*firebase-adminsdk*.json
+postgres_data
+postgres_data_prod
+*.md
+!README.md

@@ -1,6 +1,9 @@
+"use client";
+
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { getIdToken } from "@/lib/auth/client-api";
 import { useChat } from "ai/react";
 import { toast } from "sonner";
 import ReactMarkdown from "react-markdown";
@@ -8,36 +11,47 @@ import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { vscDarkPlus } from "react-syntax-highlighter/dist/esm/styles/prism";
 import type { SyntaxHighlighterProps } from "react-syntax-highlighter";
 
-const DEFAULT_COURSE_ID = "demo-course";
+type ChatTabProps = {
+	courseId: string;
+};
 
-export function ChatTab() {
-	const isProduction = process.env.NODE_ENV === "production";
-	const { messages, input, handleInputChange, handleSubmit, data } = useChat({
-		api: "/api/chat",
-		body: { courseId: DEFAULT_COURSE_ID },
-	});
+export function ChatTab({ courseId }: ChatTabProps) {
+	const { messages, input, handleInputChange, handleSubmit, data, isLoading } =
+		useChat({
+			api: "/api/chat",
+			body: { courseId },
+			fetch: async (input, init) => {
+				const token = await getIdToken();
+				if (!token) {
+					throw new Error("Not authenticated");
+				}
+				const headers = new Headers(init?.headers);
+				headers.set("Authorization", `Bearer ${token}`);
+				return fetch(input, { ...init, headers });
+			},
+		});
 
 	const handleChatSubmit = async (e: React.FormEvent) => {
 		e.preventDefault();
-		if (isProduction) {
-			toast.error("Chat is disabled in production. Please run locally.");
-			return;
-		}
 		if (!input.trim()) {
 			toast.error("Please enter a question");
 			return;
 		}
-
+		const token = await getIdToken();
+		if (!token) {
+			toast.error("Not authenticated");
+			return;
+		}
 		handleSubmit(e);
 	};
 
 	return (
 		<Card>
 			<CardHeader>
-				<CardTitle>Chat</CardTitle>
+				<CardTitle>Tutor</CardTitle>
 			</CardHeader>
 			<CardContent>
-				<ScrollArea className="h-full pr-4 mb-4">
+				<ScrollArea className="h-[480px] pr-4 mb-4">
 					<div className="space-y-4">
 						{messages.map((m) => (
 							<div
@@ -57,25 +71,33 @@ export function ChatTab() {
 										m.content
 									) : (
 										<>
-											{/* Show context details if available */}
-											{data?.length > 0 &&
-												data[data.length - 1].contextDetails?.length > 0 && (
+											{Array.isArray(data) &&
+												data.length > 0 &&
+												// biome-ignore lint/suspicious/noExplicitAny: StreamData payload
+												(data[data.length - 1] as any)?.contextDetails
+													?.length > 0 && (
 													<div className="mb-4 p-2 border border-dashed rounded-md border-gray-500 text-sm opacity-75">
 														<div className="font-semibold mb-1">
 															Context Used:
 														</div>
-														{data[data.length - 1].contextDetails.map(
-															(context, i) => (
+														{/* biome-ignore lint/suspicious/noExplicitAny: StreamData payload */}
+														{(data[data.length - 1] as any).contextDetails.map(
+															(
+																context: {
+																	content?: string;
+																	chunk?: string;
+																	metadata: Record<string, unknown>;
+																},
+																i: number,
+															) => (
 																<div key={i} className="mb-2">
 																	<div className="font-medium">
 																		{context.content ?? context.chunk}
 																	</div>
 																	<div className="text-xs text-gray-400">
-																		Distance: {context.metadata.distance} |
-																		Created: {context.metadata.createdAt} |
-																		Method: {context.metadata.chunkingMethod} |
-																		Chunk: {context.metadata.chunkIndex + 1}/
-																		{context.metadata.totalChunks}
+																		Distance: {String(context.metadata.distance)}{" "}
+																		| Created:{" "}
+																		{String(context.metadata.createdAt)}
 																	</div>
 																</div>
 															),
@@ -120,15 +142,11 @@ export function ChatTab() {
 					<input
 						value={input}
 						onChange={handleInputChange}
-						placeholder={
-							isProduction
-								? "Chat disabled in production"
-								: "Ask a question about the knowledge base..."
-						}
-						className="flex-1 p-2 border rounded-md"
-						disabled={isProduction}
+						placeholder="Ask about this course…"
+						className="flex-1 p-2 border rounded-md bg-background"
+						disabled={isLoading}
 					/>
-					<Button type="submit" disabled={isProduction}>
+					<Button type="submit" disabled={isLoading}>
 						Send
 					</Button>
 				</form>

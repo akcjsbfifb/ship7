@@ -1,17 +1,26 @@
 "use client";
 
 import { ThemeToggle } from "@/components/theme-toggle";
+import { useAuth } from "@/components/auth/auth-provider";
+import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 
 const navItems = [
 	{ href: "/", label: "Home" },
-	{ href: "/docs", label: "Documentation" },
-	{ href: "/chat", label: "Playground" },
+	{ href: "/dashboard", label: "Courses" },
+	{ href: "/docs", label: "Docs" },
 ];
 
 export function Navbar() {
 	const pathname = usePathname();
+	const router = useRouter();
+	const { firebaseUser, loading, logout } = useAuth();
+
+	const handleLogout = async () => {
+		await logout();
+		router.push("/login");
+	};
 
 	return (
 		<header className="w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50">
@@ -26,7 +35,8 @@ export function Navbar() {
 								key={item.href}
 								href={item.href}
 								className={`text-sm transition-colors hover:text-foreground/80 ${
-									pathname === item.href
+									pathname === item.href ||
+									(item.href !== "/" && pathname.startsWith(item.href))
 										? "text-foreground font-medium"
 										: "text-muted-foreground"
 								}`}
@@ -35,6 +45,21 @@ export function Navbar() {
 							</Link>
 						))}
 					</nav>
+					{!loading &&
+						(firebaseUser ? (
+							<div className="flex items-center gap-2">
+								<span className="hidden sm:inline text-xs text-muted-foreground max-w-[140px] truncate">
+									{firebaseUser.email}
+								</span>
+								<Button variant="outline" size="sm" onClick={handleLogout}>
+									Log out
+								</Button>
+							</div>
+						) : (
+							<Button variant="default" size="sm" asChild>
+								<Link href="/login">Log in</Link>
+							</Button>
+						))}
 					<ThemeToggle />
 				</div>
 			</div>
