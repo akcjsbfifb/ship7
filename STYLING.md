@@ -10,3 +10,4 @@ Queremos organizar nuestra app para tener una UI sencilla y minimalista, facil d
 - Boton para hacer consultas especificas sobre un tema o archivo, aparece como hover de dicho archivo o tema
 - Input de texto para hacer consultas al chatbot
 - Boton de envio de consulta
+- Resumen de dudas frecuentes y temas que resultaron mas complejos para que el profesor pueda enfocar su atencion en dichos temas
