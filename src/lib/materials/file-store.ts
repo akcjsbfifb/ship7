@@ -4,11 +4,21 @@ import { dirname, join } from 'path';
 import { getAdminApp } from '@/lib/firebase/admin';
 import { getStorage } from 'firebase-admin/storage';
 
+export type SignedUrlOptions = {
+  expiresMs?: number;
+  inline?: boolean;
+  filename?: string;
+  contentType?: string;
+};
+
 export type FileStore = {
   put: (path: string, data: Buffer, contentType: string) => Promise<void>;
   get: (path: string) => Promise<Buffer>;
   delete: (path: string) => Promise<void>;
-  getSignedReadUrl?: (path: string, expiresMs?: number) => Promise<string>;
+  getSignedReadUrl?: (
+    path: string,
+    options?: number | SignedUrlOptions,
+  ) => Promise<string>;
 };
 
 function localRoot() {
@@ -61,10 +71,20 @@ function createFirebaseStore(): FileStore {
         // ignore
       }
     },
-    async getSignedReadUrl(path, expiresMs = 60 * 60 * 1000) {
+    async getSignedReadUrl(path, options = {}) {
+      const opts: SignedUrlOptions =
+        typeof options === 'number' ? { expiresMs: options } : options;
+      const expiresMs = opts.expiresMs ?? 60 * 60 * 1000;
+      const safeName = (opts.filename || 'file').replace(/"/g, '');
+      const disposition = opts.inline
+        ? `inline; filename="${safeName}"`
+        : `attachment; filename="${safeName}"`;
+
       const [url] = await bucket.file(path).getSignedUrl({
         action: 'read',
         expires: Date.now() + expiresMs,
+        responseDisposition: disposition,
+        ...(opts.contentType ? { responseType: opts.contentType } : {}),
       });
       return url;
     },

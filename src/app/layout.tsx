@@ -7,7 +7,7 @@ import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "sonner";
 
 export const metadata: Metadata = {
-	title: "EducAI: un tutor IA anclado a la bibliografía de tu cátedra",
+	title: "Bookworm: un tutor IA anclado a la bibliografía de tu cátedra",
 	description:
 		"Creá cursos, subí el material y tus alumnos estudian con una IA que responde solo con las fuentes del curso, citando cada respuesta.",
 };

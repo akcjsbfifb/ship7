@@ -5,6 +5,7 @@ import { handleError } from '@/lib/auth/http';
 import { requireCourseAccess } from '@/lib/auth/require-course-access';
 import { requireUser } from '@/lib/auth/require-user';
 import { prisma } from '@/lib/db/client';
+import { withDownloadUrls } from '@/lib/materials/download-url';
 
 export async function GET(
   req: Request,
@@ -22,12 +23,19 @@ export async function GET(
       include: {
         materials: {
           where: isTeacher ? undefined : { status: 'READY' },
-          orderBy: { createdAt: 'desc' },
+          orderBy: [{ position: 'asc' }, { createdAt: 'asc' }],
         },
       },
     });
 
-    return NextResponse.json({ topics, isTeacher });
+    const topicsWithUrls = await Promise.all(
+      topics.map(async (topic) => ({
+        ...topic,
+        materials: await withDownloadUrls(topic.materials),
+      })),
+    );
+
+    return NextResponse.json({ topics: topicsWithUrls, isTeacher });
   } catch (error) {
     return handleError(error);
   }

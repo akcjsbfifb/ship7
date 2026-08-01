@@ -25,15 +25,23 @@ export function Navbar() {
 	return (
 		<header className="sticky top-0 z-50 w-full border-b border-border bg-background/90 backdrop-blur supports-[backdrop-filter]:bg-background/75">
 			<div className="mx-auto flex h-16 max-w-[1200px] items-center justify-between px-4">
-				<Link href="/" className="flex items-center gap-2">
+				<Link href="/" className="flex items-center">
 					<Image
-						src="/logos/mortarboard.svg"
-						alt=""
-						width={28}
+						src="/logos/bookworm-wordmark.png"
+						alt="Bookworm"
+						width={100}
 						height={28}
-						aria-hidden
+						className="h-7 w-auto dark:hidden"
+						priority
 					/>
-					<span className="text-lg font-semibold tracking-tight">EducAI</span>
+					<Image
+						src="/logos/bookworm-wordmark-dark.png"
+						alt="Bookworm"
+						width={100}
+						height={28}
+						className="hidden h-7 w-auto dark:block"
+						priority
+					/>
 				</Link>
 				<div className="flex items-center gap-6">
 					<nav className="flex items-center gap-4">

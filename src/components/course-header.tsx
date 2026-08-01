@@ -11,7 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { authFetch } from "@/lib/auth/client-api";
-import { initialsOf, type CourseSummary, type MeUser } from "@/lib/types";
+import { type CourseSummary, type MeUser, initialsOf } from "@/lib/types";
 
 export function CourseHeader({
 	course,
@@ -29,7 +29,7 @@ export function CourseHeader({
 	const { firebaseUser, logout } = useAuth();
 	const displayName =
 		user?.name || firebaseUser?.displayName || user?.email || "Usuario";
-	const photoURL = firebaseUser?.photoURL ?? undefined;
+	const photoURL = firebaseUser?.photoURL || user?.photoUrl || undefined;
 
 	const copyInvite = async () => {
 		await navigator.clipboard.writeText(course.inviteCode);
@@ -83,7 +83,7 @@ export function CourseHeader({
 						)}
 					</div>
 					<p className="truncate text-xs text-muted-foreground">
-						{course.description || "Curso EducAI"}
+						{course.description || "Curso de Bookworm"}
 					</p>
 				</div>
 
@@ -96,7 +96,11 @@ export function CourseHeader({
 
 				{isTeacher && (
 					<div className="hidden items-center gap-1 md:flex">
-						<Button size="sm" variant="outline" onClick={() => void copyInvite()}>
+						<Button
+							size="sm"
+							variant="outline"
+							onClick={() => void copyInvite()}
+						>
 							<Copy className="size-3.5" />
 							Copiar
 						</Button>
@@ -110,14 +114,25 @@ export function CourseHeader({
 					</div>
 				)}
 
-				<Separator orientation="vertical" className="mx-1 hidden h-6 sm:block" />
+				<Separator
+					orientation="vertical"
+					className="mx-1 hidden h-6 sm:block"
+				/>
 
 				<ThemeToggle />
 
-				<button type="button" onClick={() => void logout()} title="Cerrar sesión">
+				<button
+					type="button"
+					onClick={() => void logout()}
+					title="Cerrar sesión"
+				>
 					<Avatar className="size-9">
 						{photoURL ? (
-							<AvatarImage src={photoURL} alt={displayName} referrerPolicy="no-referrer" />
+							<AvatarImage
+								src={photoURL}
+								alt={displayName}
+								referrerPolicy="no-referrer"
+							/>
 						) : null}
 						<AvatarFallback className="bg-secondary text-xs font-medium">
 							{initialsOf(displayName, user?.email)}

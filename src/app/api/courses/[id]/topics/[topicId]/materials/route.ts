@@ -10,6 +10,62 @@ import { processMaterialUpload } from '@/lib/materials/process';
 
 export const maxDuration = 60;
 
+export async function PATCH(
+  req: Request,
+  { params }: { params: Promise<{ id: string; topicId: string }> },
+) {
+  try {
+    const { user } = await requireUser(req);
+    const { id: courseId, topicId } = await params;
+    await requireCourseAccess(user, courseId, { teacherOnly: true });
+
+    const topic = await prisma.courseTopic.findFirst({
+      where: { id: topicId, courseId },
+    });
+    if (!topic) throw new AuthError('Topic not found', 404);
+
+    const body = await req.json().catch(() => ({}));
+    const orderedIds = Array.isArray(body.orderedIds)
+      ? body.orderedIds.filter((id: unknown): id is string => typeof id === 'string')
+      : null;
+
+    if (!orderedIds || orderedIds.length === 0) {
+      throw new AuthError('orderedIds is required', 400);
+    }
+
+    const existing = await prisma.material.findMany({
+      where: { topicId, courseId },
+      select: { id: true },
+    });
+    const existingIds = new Set(existing.map((m) => m.id));
+
+    if (
+      orderedIds.length !== existingIds.size ||
+      orderedIds.some((id) => !existingIds.has(id))
+    ) {
+      throw new AuthError('orderedIds must include every material in the topic', 400);
+    }
+
+    await prisma.$transaction(
+      orderedIds.map((id, position) =>
+        prisma.material.update({
+          where: { id },
+          data: { position },
+        }),
+      ),
+    );
+
+    const materials = await prisma.material.findMany({
+      where: { topicId, courseId },
+      orderBy: [{ position: 'asc' }, { createdAt: 'asc' }],
+    });
+
+    return NextResponse.json({ materials });
+  } catch (error) {
+    return handleError(error);
+  }
+}
+
 export async function POST(
   req: Request,
   { params }: { params: Promise<{ id: string; topicId: string }> },
@@ -23,6 +79,8 @@ export async function POST(
       where: { id: topicId, courseId },
     });
     if (!topic) throw new AuthError('Topic not found', 404);
+
+    const nextPosition = await prisma.material.count({ where: { topicId } });
 
     const form = await req.formData();
     const file = form.get('file');
@@ -49,6 +107,7 @@ export async function POST(
           mimeType: 'text/plain',
           storagePath: '',
           sizeBytes: buffer.length,
+          position: nextPosition,
           status: 'PROCESSING',
         },
       });
@@ -96,6 +155,7 @@ export async function POST(
         mimeType,
         storagePath: '',
         sizeBytes: buffer.length,
+        position: nextPosition,
         status: 'PROCESSING',
       },
     });

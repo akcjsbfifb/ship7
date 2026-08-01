@@ -1,6 +1,7 @@
 "use client";
 
-import { GraduationCap, LogOut } from "lucide-react";
+import { LogOut } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 
 import { useAuth } from "@/components/auth/auth-provider";
@@ -14,30 +15,33 @@ import {
 	DropdownMenuSeparator,
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { initialsOf, type MeUser } from "@/lib/types";
+import { type MeUser, initialsOf } from "@/lib/types";
 
 export function DashboardHeader({ user }: { user?: MeUser | null }) {
 	const { firebaseUser, logout } = useAuth();
 	const displayName =
 		user?.name || firebaseUser?.displayName || user?.email || "Usuario";
 	const email = user?.email || firebaseUser?.email || "";
-	const photoURL = firebaseUser?.photoURL ?? undefined;
+	const photoURL = firebaseUser?.photoURL || user?.photoUrl || undefined;
 
 	return (
 		<header className="sticky top-0 z-20 border-b border-border bg-background/80 backdrop-blur-md">
 			<div className="mx-auto flex max-w-6xl items-center gap-3 px-4 py-3 md:px-6">
-				<Link href="/dashboard" className="flex items-center gap-3 min-w-0">
-					<div className="cut-sm flex size-9 shrink-0 items-center justify-center border border-brand/40 bg-brand/10 text-brand">
-						<GraduationCap className="size-5" />
-					</div>
-					<div className="min-w-0">
-						<h1 className="text-base font-semibold leading-tight tracking-tight md:text-lg">
-							EducAI
-						</h1>
-						<p className="truncate text-xs text-muted-foreground">
-							Mis clases y cursos
-						</p>
-					</div>
+				<Link href="/dashboard" className="flex min-w-0 items-center">
+					<Image
+						src="/logos/bookworm-wordmark.png"
+						alt="Bookworm"
+						width={100}
+						height={28}
+						className="h-7 w-auto dark:hidden"
+					/>
+					<Image
+						src="/logos/bookworm-wordmark-dark.png"
+						alt="Bookworm"
+						width={100}
+						height={28}
+						className="hidden h-7 w-auto dark:block"
+					/>
 				</Link>
 
 				<div className="flex-1" />
@@ -53,7 +57,11 @@ export function DashboardHeader({ user }: { user?: MeUser | null }) {
 						>
 							<Avatar className="size-9">
 								{photoURL ? (
-									<AvatarImage src={photoURL} alt={displayName} referrerPolicy="no-referrer" />
+									<AvatarImage
+										src={photoURL}
+										alt={displayName}
+										referrerPolicy="no-referrer"
+									/>
 								) : null}
 								<AvatarFallback className="bg-secondary text-xs font-medium">
 									{initialsOf(displayName, email)}

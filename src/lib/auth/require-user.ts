@@ -36,6 +36,10 @@ export async function requireUser(req: Request): Promise<RequireUserResult> {
   }
 
   const name = decodedToken.name?.trim() || null;
+  const photoUrl =
+    typeof decodedToken.picture === 'string' && decodedToken.picture.trim()
+      ? decodedToken.picture.trim()
+      : null;
 
   const existing = await prisma.user.findUnique({
     where: { firebaseUid: decodedToken.uid },
@@ -47,6 +51,7 @@ export async function requireUser(req: Request): Promise<RequireUserResult> {
         data: {
           email,
           ...(name ? { name } : {}),
+          ...(photoUrl ? { photoUrl } : {}),
         },
       })
     : await prisma.user.create({
@@ -54,6 +59,7 @@ export async function requireUser(req: Request): Promise<RequireUserResult> {
           firebaseUid: decodedToken.uid,
           email,
           name,
+          photoUrl,
         },
       });
 

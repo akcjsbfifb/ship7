@@ -1,6 +1,6 @@
 "use client";
 
-import { useAuth, type AppRole } from "@/components/auth/auth-provider";
+import { type AppRole, useAuth } from "@/components/auth/auth-provider";
 import { Navbar } from "@/components/navbar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -46,7 +46,9 @@ export default function RegisterPage() {
 			toast.success("Listo");
 			router.push("/dashboard");
 		} catch (err) {
-			toast.error(err instanceof Error ? err.message : "No se pudo entrar con Google");
+			toast.error(
+				err instanceof Error ? err.message : "No se pudo entrar con Google",
+			);
 		} finally {
 			setSubmitting(false);
 		}
@@ -60,7 +62,7 @@ export default function RegisterPage() {
 					<CardHeader>
 						<CardTitle className="text-2xl">Crear cuenta</CardTitle>
 						<p className="text-sm text-muted-foreground">
-							Registrate como alumno o docente en EducAI.
+							Registrate como alumno o docente en Bookworm.
 						</p>
 					</CardHeader>
 					<CardContent className="space-y-4">
@@ -135,7 +137,10 @@ export default function RegisterPage() {
 						</p>
 						<p className="text-sm text-muted-foreground text-center">
 							¿Ya tenés cuenta?{" "}
-							<Link href="/login" className="text-primary underline-offset-4 hover:underline">
+							<Link
+								href="/login"
+								className="text-primary underline-offset-4 hover:underline"
+							>
 								Iniciar sesión
 							</Link>
 						</p>

@@ -1,7 +1,9 @@
 "use client";
 
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { authFetch } from "@/lib/auth/client-api";
+import { initialsOf } from "@/lib/types";
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
 
@@ -9,6 +11,7 @@ type Student = {
 	id: string;
 	name: string | null;
 	email: string;
+	photoUrl?: string | null;
 	joinedAt: string;
 };
 
@@ -53,24 +56,36 @@ export function StudentsPanel({ courseId }: { courseId: string }) {
 				</p>
 			) : (
 				<ul className="divide-y divide-border">
-					{students.map((s) => (
-						<li key={s.id} className="flex items-center gap-3 py-3">
-							<div className="flex size-9 shrink-0 items-center justify-center rounded-full bg-secondary text-xs font-medium">
-								{(s.name || s.email).slice(0, 2).toUpperCase()}
-							</div>
-							<div className="min-w-0 flex-1">
-								<p className="truncate text-sm font-medium">
-									{s.name || "—"}
-								</p>
-								<p className="truncate text-xs text-muted-foreground">
-									{s.email}
-								</p>
-							</div>
-							<span className="shrink-0 text-xs text-muted-foreground">
-								{new Date(s.joinedAt).toLocaleDateString()}
-							</span>
-						</li>
-					))}
+					{students.map((s) => {
+						const label = s.name || s.email;
+						return (
+							<li key={s.id} className="flex items-center gap-3 py-3">
+								<Avatar className="size-9">
+									{s.photoUrl ? (
+										<AvatarImage
+											src={s.photoUrl}
+											alt={label}
+											referrerPolicy="no-referrer"
+										/>
+									) : null}
+									<AvatarFallback className="bg-secondary text-xs font-medium">
+										{initialsOf(s.name, s.email)}
+									</AvatarFallback>
+								</Avatar>
+								<div className="min-w-0 flex-1">
+									<p className="truncate text-sm font-medium">
+										{s.name || "—"}
+									</p>
+									<p className="truncate text-xs text-muted-foreground">
+										{s.email}
+									</p>
+								</div>
+								<span className="shrink-0 text-xs text-muted-foreground">
+									{new Date(s.joinedAt).toLocaleDateString()}
+								</span>
+							</li>
+						);
+					})}
 				</ul>
 			)}
 			<div className="mt-4">

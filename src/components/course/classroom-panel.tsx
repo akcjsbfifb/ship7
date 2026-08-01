@@ -5,7 +5,16 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { authFetch, getIdToken } from "@/lib/auth/client-api";
-import { ChevronDown, ChevronRight, FileText, Trash2, Upload } from "lucide-react";
+import {
+	ArrowDown,
+	ArrowUp,
+	ChevronDown,
+	ChevronRight,
+	ExternalLink,
+	FileText,
+	Trash2,
+	Upload,
+} from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
 
@@ -13,6 +22,7 @@ type Material = {
 	id: string;
 	title: string;
 	filename: string;
+	mimeType?: string;
 	status: "PROCESSING" | "READY" | "FAILED";
 	errorMessage: string | null;
 	downloadUrl?: string | null;
@@ -36,6 +46,7 @@ export function ClassroomPanel({
 	const [openIds, setOpenIds] = useState<Record<string, boolean>>({});
 	const [newTitle, setNewTitle] = useState("");
 	const [busy, setBusy] = useState(false);
+	const [reorderingTopicId, setReorderingTopicId] = useState<string | null>(null);
 	const [pasteTopicId, setPasteTopicId] = useState<string | null>(null);
 	const [pasteText, setPasteText] = useState("");
 
@@ -168,6 +179,69 @@ export function ClassroomPanel({
 		}
 	};
 
+	const openMaterial = (material: Material) => {
+		if (material.status !== "READY") {
+			toast.error("El archivo todavía no está listo");
+			return;
+		}
+		// Same-origin viewer avoids chrome-error from failed cross-origin Storage URLs.
+		window.open(
+			`/courses/${courseId}/files/${material.id}`,
+			"_blank",
+			"noopener,noreferrer",
+		);
+	};
+
+	const moveMaterial = async (
+		topicId: string,
+		materialId: string,
+		direction: "up" | "down",
+	) => {
+		const topic = topics.find((t) => t.id === topicId);
+		if (!topic) return;
+
+		const index = topic.materials.findIndex((m) => m.id === materialId);
+		if (index < 0) return;
+		const target = direction === "up" ? index - 1 : index + 1;
+		if (target < 0 || target >= topic.materials.length) return;
+
+		const nextMaterials = [...topic.materials];
+		const [item] = nextMaterials.splice(index, 1);
+		nextMaterials.splice(target, 0, item);
+		const orderedIds = nextMaterials.map((m) => m.id);
+
+		setTopics((prev) =>
+			prev.map((t) =>
+				t.id === topicId ? { ...t, materials: nextMaterials } : t,
+			),
+		);
+		setReorderingTopicId(topicId);
+
+		try {
+			const res = await authFetch(
+				`/api/courses/${courseId}/topics/${topicId}/materials`,
+				{
+					method: "PATCH",
+					body: JSON.stringify({ orderedIds }),
+				},
+			);
+			const data = await res.json();
+			if (!res.ok) throw new Error(data.error || "Error");
+			if (Array.isArray(data.materials)) {
+				setTopics((prev) =>
+					prev.map((t) =>
+						t.id === topicId ? { ...t, materials: data.materials } : t,
+					),
+				);
+			}
+		} catch (err) {
+			toast.error(err instanceof Error ? err.message : "No se pudo reordenar");
+			await load();
+		} finally {
+			setReorderingTopicId(null);
+		}
+	};
+
 	const deleteTopic = async (topicId: string) => {
 		if (!confirm("¿Borrar el tema y todos sus archivos?")) return;
 		setBusy(true);
@@ -191,7 +265,7 @@ export function ClassroomPanel({
 			{isTeacher && (
 				<div className="cut flex items-start gap-2.5 border border-brand/30 bg-brand/5 px-4 py-3 text-sm text-muted-foreground">
 					Todo el material que subas se indexa automáticamente para el tutor IA
-					del curso.
+					del curso. Podés reordenar los archivos de cada tema con las flechas.
 				</div>
 			)}
 
@@ -225,6 +299,7 @@ export function ClassroomPanel({
 			) : (
 				topics.map((topic) => {
 					const open = openIds[topic.id] ?? true;
+					const topicBusy = busy || reorderingTopicId === topic.id;
 					return (
 						<Card key={topic.id} className="overflow-hidden shadow-none">
 							<button
@@ -245,21 +320,64 @@ export function ClassroomPanel({
 								</span>
 							</button>
 							{open && (
-								<CardContent className="space-y-3 pt-0 border-t">
+								<CardContent className="space-y-3 border-t pt-0">
 									{topic.materials.length === 0 ? (
-										<p className="text-sm text-muted-foreground py-2">
+										<p className="py-2 text-sm text-muted-foreground">
 											Sin archivos en este tema.
 										</p>
 									) : (
 										<ul className="space-y-2">
-											{topic.materials.map((m) => (
+											{topic.materials.map((m, index) => (
 												<li
 													key={m.id}
-													className="flex items-center gap-2 text-sm py-2 border-b last:border-0"
+													className="flex items-center gap-2 border-b py-2 text-sm last:border-0"
 												>
+													{isTeacher && (
+														<div className="flex shrink-0 flex-col">
+															<Button
+																type="button"
+																size="icon"
+																variant="ghost"
+																className="size-7"
+																disabled={topicBusy || index === 0}
+																aria-label="Subir archivo"
+																onClick={() =>
+																	void moveMaterial(topic.id, m.id, "up")
+																}
+															>
+																<ArrowUp className="h-3.5 w-3.5" />
+															</Button>
+															<Button
+																type="button"
+																size="icon"
+																variant="ghost"
+																className="size-7"
+																disabled={
+																	topicBusy ||
+																	index === topic.materials.length - 1
+																}
+																aria-label="Bajar archivo"
+																onClick={() =>
+																	void moveMaterial(topic.id, m.id, "down")
+																}
+															>
+																<ArrowDown className="h-3.5 w-3.5" />
+															</Button>
+														</div>
+													)}
 													<FileText className="h-4 w-4 shrink-0 text-muted-foreground" />
-													<div className="flex-1 min-w-0">
-														<div className="font-medium truncate">{m.title}</div>
+													<div className="min-w-0 flex-1">
+														{m.status === "READY" ? (
+															<button
+																type="button"
+																className="block w-full truncate text-left font-medium text-primary hover:underline"
+																onClick={() => void openMaterial(m)}
+															>
+																{m.title}
+															</button>
+														) : (
+															<div className="truncate font-medium">{m.title}</div>
+														)}
 														<div className="text-xs text-muted-foreground">
 															{m.filename} · {m.status}
 															{m.status === "FAILED" && m.errorMessage
@@ -267,21 +385,23 @@ export function ClassroomPanel({
 																: ""}
 														</div>
 													</div>
-													{m.downloadUrl && (
-														<a
-															href={m.downloadUrl}
-															target="_blank"
-															rel="noreferrer"
-															className="text-xs text-primary underline"
+													{m.status === "READY" && (
+														<Button
+															type="button"
+															size="sm"
+															variant="outline"
+															className="shrink-0 gap-1.5"
+															onClick={() => void openMaterial(m)}
 														>
-															Descargar
-														</a>
+															<ExternalLink className="h-3.5 w-3.5" />
+															Abrir
+														</Button>
 													)}
 													{isTeacher && (
 														<Button
 															size="icon"
 															variant="ghost"
-															disabled={busy}
+															disabled={topicBusy}
 															onClick={() => void deleteMaterial(m.id)}
 														>
 															<Trash2 className="h-4 w-4" />
@@ -293,14 +413,14 @@ export function ClassroomPanel({
 									)}
 
 									{isTeacher && (
-										<div className="flex flex-wrap gap-2 pt-2 items-center">
-											<label className="inline-flex items-center gap-2 text-sm border rounded-md px-3 py-1.5 cursor-pointer hover:bg-muted">
+										<div className="flex flex-wrap items-center gap-2 pt-2">
+											<label className="inline-flex cursor-pointer items-center gap-2 rounded-md border px-3 py-1.5 text-sm hover:bg-muted">
 												<Upload className="h-3.5 w-3.5" />
 												Subir archivo
 												<input
 													type="file"
 													className="hidden"
-													disabled={busy}
+													disabled={topicBusy}
 													onChange={(e) => {
 														const f = e.target.files?.[0];
 														if (f) void uploadFile(topic.id, f);
@@ -324,7 +444,7 @@ export function ClassroomPanel({
 												type="button"
 												size="sm"
 												variant="ghost"
-												disabled={busy}
+												disabled={topicBusy}
 												onClick={() => void deleteTopic(topic.id)}
 											>
 												Borrar tema
@@ -342,7 +462,7 @@ export function ClassroomPanel({
 											/>
 											<Button
 												size="sm"
-												disabled={busy || !pasteText.trim()}
+												disabled={topicBusy || !pasteText.trim()}
 												onClick={() => void pasteAsMaterial(topic.id)}
 											>
 												Indexar texto

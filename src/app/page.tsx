@@ -59,10 +59,19 @@ export default function Home() {
 					<div className="cut-brackets relative hidden p-2 md:block">
 						<div className="cut-lg flex justify-center border border-brand/30 bg-cream/70 p-10">
 							<Image
-								src="/logos/mortarboard.svg"
-								alt="Birrete de graduación"
-								width={260}
-								height={260}
+								src="/logos/bookworm-icon.png"
+								alt="Logo de Bookworm: un libro con un gusano verde"
+								width={220}
+								height={246}
+								className="dark:hidden"
+								priority
+							/>
+							<Image
+								src="/logos/bookworm-icon-dark.png"
+								alt="Logo de Bookworm: un libro con un gusano verde"
+								width={220}
+								height={246}
+								className="hidden dark:block"
 								priority
 							/>
 						</div>
@@ -227,7 +236,20 @@ export default function Home() {
 
 			<footer className="border-t border-border">
 				<div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-6 text-sm text-muted-foreground">
-					<span className="font-medium text-foreground">EducAI</span>
+					<Image
+						src="/logos/bookworm-wordmark.png"
+						alt="Bookworm"
+						width={86}
+						height={24}
+						className="h-6 w-auto dark:hidden"
+					/>
+					<Image
+						src="/logos/bookworm-wordmark-dark.png"
+						alt="Bookworm"
+						width={86}
+						height={24}
+						className="hidden h-6 w-auto dark:block"
+					/>
 					<span>Hecho en Rosario, Argentina</span>
 				</div>
 			</footer>

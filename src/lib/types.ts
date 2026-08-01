@@ -11,6 +11,7 @@ export type MeUser = {
 	id: string;
 	email: string;
 	name: string | null;
+	photoUrl?: string | null;
 	role: "TEACHER" | "STUDENT";
 };
 

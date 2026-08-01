@@ -18,7 +18,7 @@ export async function GET(req: Request, context: RouteContext) {
       where: { courseId },
       orderBy: { createdAt: 'desc' },
       include: {
-        user: { select: { id: true, name: true, email: true } },
+        user: { select: { id: true, name: true, email: true, photoUrl: true } },
       },
     });
 
@@ -27,6 +27,7 @@ export async function GET(req: Request, context: RouteContext) {
         id: e.user.id,
         name: e.user.name,
         email: e.user.email,
+        photoUrl: e.user.photoUrl,
         joinedAt: e.createdAt,
       })),
     });

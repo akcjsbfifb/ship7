@@ -22,6 +22,7 @@ type MaterialRow = {
 	filename: string;
 	status: string;
 	topicTitle: string;
+	downloadUrl?: string | null;
 };
 
 type Topic = {
@@ -455,8 +456,24 @@ function ChatbotInner({
 							{materials.map((m) => (
 								<li key={m.id} className="flex gap-2 text-sm">
 									<FileText className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" />
-									<div className="min-w-0">
-										<div className="truncate font-medium">{m.title}</div>
+									<div className="min-w-0 flex-1">
+										{m.status === "READY" ? (
+											<button
+												type="button"
+												className="block w-full truncate text-left font-medium text-primary hover:underline"
+												onClick={() => {
+													window.open(
+														`/courses/${courseId}/files/${m.id}`,
+														"_blank",
+														"noopener,noreferrer",
+													);
+												}}
+											>
+												{m.title}
+											</button>
+										) : (
+											<div className="truncate font-medium">{m.title}</div>
+										)}
 										<div className="truncate text-xs text-muted-foreground">
 											{m.topicTitle} · {m.status}
 										</div>

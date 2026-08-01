@@ -31,7 +31,9 @@ export default function LoginPage() {
 			toast.success("Bienvenido");
 			router.push("/dashboard");
 		} catch (err) {
-			toast.error(err instanceof Error ? err.message : "No se pudo iniciar sesión");
+			toast.error(
+				err instanceof Error ? err.message : "No se pudo iniciar sesión",
+			);
 		} finally {
 			setSubmitting(false);
 		}
@@ -44,7 +46,9 @@ export default function LoginPage() {
 			toast.success("Bienvenido");
 			router.push("/dashboard");
 		} catch (err) {
-			toast.error(err instanceof Error ? err.message : "No se pudo entrar con Google");
+			toast.error(
+				err instanceof Error ? err.message : "No se pudo entrar con Google",
+			);
 		} finally {
 			setSubmitting(false);
 		}
@@ -58,7 +62,7 @@ export default function LoginPage() {
 					<CardHeader>
 						<CardTitle className="text-2xl">Iniciar sesión</CardTitle>
 						<p className="text-sm text-muted-foreground">
-							Entrá a EducAI para ver tus clases y el tutor IA.
+							Entrá a Bookworm para ver tus clases y el tutor IA.
 						</p>
 					</CardHeader>
 					<CardContent className="space-y-4">
@@ -104,7 +108,10 @@ export default function LoginPage() {
 						</Button>
 						<p className="text-sm text-muted-foreground text-center">
 							¿No tenés cuenta?{" "}
-							<Link href="/register" className="text-primary underline-offset-4 hover:underline">
+							<Link
+								href="/register"
+								className="text-primary underline-offset-4 hover:underline"
+							>
 								Registrate
 							</Link>
 						</p>
