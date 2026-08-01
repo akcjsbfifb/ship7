@@ -1,0 +1,3 @@
+## Estilizado de EducAI
+
+Queremos organizar nuestra app para tener una UI sencilla y minimalista, facil de comprender. Queremos una escala de grises (tirando a negro en el modo oscuro, tirando a blanco en modo claro) que se complemente con un tono verde en detalles minimos (borders de botones, indicadores minimos, etc.) Un tono lima en el modo light, un tono musgo en el modo oscuro. Queremos bordes de redondeados, y una funcion de chat similar a la UI de notebookLM. Que se puedan consultar las fuentes subidas a la par del chatbot. 
