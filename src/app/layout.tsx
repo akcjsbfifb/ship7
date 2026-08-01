@@ -7,9 +7,9 @@ import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "sonner";
 
 export const metadata: Metadata = {
-	title: "EduAI — Interactive Learning Platform",
+	title: "EducAI — Cursos con tutor IA",
 	description:
-		"Hackathon prototype: courses, RAG tutor, attendance & teacher tools on Next.js + pgvector",
+		"Plataforma educativa: cursos, material indexado y tutor RAG por clase",
 };
 
 export default function RootLayout({
@@ -18,7 +18,7 @@ export default function RootLayout({
 	children: React.ReactNode;
 }) {
 	return (
-		<html lang="en" suppressHydrationWarning>
+		<html lang="es" suppressHydrationWarning>
 			<body
 				className={`${GeistSans.variable} ${GeistMono.variable} font-sans antialiased min-h-screen bg-background`}
 			>

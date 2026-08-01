@@ -54,9 +54,12 @@ export default function LoginPage() {
 		<div className="min-h-screen flex flex-col">
 			<Navbar />
 			<main className="flex-1 flex items-center justify-center px-4 py-12">
-				<Card className="w-full max-w-md">
+				<Card className="w-full max-w-md shadow-none">
 					<CardHeader>
-						<CardTitle className="font-mono text-2xl">Log in</CardTitle>
+						<CardTitle className="text-2xl">Iniciar sesión</CardTitle>
+						<p className="text-sm text-muted-foreground">
+							Entrá a EducAI para ver tus clases y el tutor IA.
+						</p>
 					</CardHeader>
 					<CardContent className="space-y-4">
 						<form onSubmit={handleSubmit} className="space-y-4">
@@ -69,13 +72,17 @@ export default function LoginPage() {
 							/>
 							<Input
 								type="password"
-								placeholder="Password"
+								placeholder="Contraseña"
 								value={password}
 								onChange={(e) => setPassword(e.target.value)}
 								required
 							/>
-							<Button type="submit" className="w-full" disabled={submitting}>
-								{submitting ? "Signing in…" : "Sign in"}
+							<Button
+								type="submit"
+								className="w-full bg-brand text-brand-foreground hover:bg-brand/90"
+								disabled={submitting}
+							>
+								{submitting ? "Ingresando…" : "Ingresar"}
 							</Button>
 						</form>
 						<div className="relative">
@@ -83,7 +90,7 @@ export default function LoginPage() {
 								<span className="w-full border-t" />
 							</div>
 							<div className="relative flex justify-center text-xs uppercase">
-								<span className="bg-card px-2 text-muted-foreground">or</span>
+								<span className="bg-card px-2 text-muted-foreground">o</span>
 							</div>
 						</div>
 						<Button
@@ -93,12 +100,12 @@ export default function LoginPage() {
 							disabled={submitting}
 							onClick={handleGoogle}
 						>
-							Continue with Google
+							Continuar con Google
 						</Button>
 						<p className="text-sm text-muted-foreground text-center">
-							No account?{" "}
+							¿No tenés cuenta?{" "}
 							<Link href="/register" className="text-primary underline-offset-4 hover:underline">
-								Register
+								Registrate
 							</Link>
 						</p>
 					</CardContent>

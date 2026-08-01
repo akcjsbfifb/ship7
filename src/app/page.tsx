@@ -1,85 +1,67 @@
-import { Navbar } from "@/components/navbar";
-import { TechIcons } from "@/components/tech-icons";
-import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { DotPattern } from "@/components/ui/dot-pattern";
-import { Braces, Database, GitBranch, Terminal } from "lucide-react";
+import { GraduationCap, KeyRound, Sparkles } from "lucide-react";
 import Link from "next/link";
+
+import { Navbar } from "@/components/navbar";
+import { Button } from "@/components/ui/button";
 
 export default function Home() {
 	return (
-		<div className="min-h-[calc(100vh-4rem)] flex flex-col justify-between">
+		<div className="relative min-h-dvh overflow-hidden bg-background">
+			<div
+				aria-hidden
+				className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top,_hsl(var(--brand)/0.18),_transparent_55%),radial-gradient(ellipse_at_bottom_right,_hsl(var(--brand)/0.08),_transparent_40%)]"
+			/>
 			<Navbar />
-			<main className="flex-1 flex flex-col items-center justify-center gap-8 max-w-4xl mx-auto px-4 py-12">
-				<div className="space-y-4 text-center">
-					<h1 className="text-4xl font-bold tracking-tighter sm:text-5xl font-mono">
-						EduAI
+			<main className="relative mx-auto flex max-w-5xl flex-col gap-12 px-4 py-16 md:py-24">
+				<section className="max-w-2xl space-y-6">
+					<div className="inline-flex items-center gap-2 rounded-lg border border-brand/40 bg-brand/10 px-3 py-1.5 text-sm text-brand-foreground">
+						<GraduationCap className="size-4 text-brand" />
+						EducAI
+					</div>
+					<h1 className="text-balance text-4xl font-semibold tracking-tight md:text-5xl">
+						Clases con un tutor IA entrenado en tu material
 					</h1>
-					<p className="text-muted-foreground max-w-[600px] mx-auto">
-						Interactive courses with a course-scoped RAG tutor. Teachers ingest
-						material; students join with an invite code and chat within their
-						course knowledge base.
+					<p className="max-w-xl text-base leading-relaxed text-muted-foreground md:text-lg">
+						Creá cursos, subí apuntes y bibliografía, y dejá que el asistente
+						responda con contexto del curso. Los alumnos se unen con un código.
 					</p>
-				</div>
+					<div className="flex flex-wrap gap-3">
+						<Button
+							asChild
+							className="bg-brand text-brand-foreground hover:bg-brand/90"
+						>
+							<Link href="/register">Crear cuenta</Link>
+						</Button>
+						<Button variant="outline" asChild>
+							<Link href="/login">Iniciar sesión</Link>
+						</Button>
+					</div>
+				</section>
 
-				<DotPattern className="absolute inset-0 opacity-80 -z-10 [mask-image:radial-gradient(500px_circle_at_center,white,transparent)]" />
-
-				<div className="grid sm:grid-cols-2 gap-4 w-full max-w-3xl relative z-10">
-					<Card className="p-6 border-2 hover:border-primary/50 transition-colors">
-						<div className="flex flex-col gap-4 h-full">
-							<Terminal className="h-10 w-10 text-primary" />
-							<h2 className="font-semibold text-xl">Core Stack</h2>
-							<ul className="space-y-2 text-muted-foreground">
-								<li className="flex items-center gap-2">
-									<Database className="h-4 w-4" /> PostgreSQL + pgvector
-								</li>
-								<li className="flex items-center gap-2">
-									<GitBranch className="h-4 w-4" /> Course-scoped RAG
-								</li>
-								<li className="flex items-center gap-2">
-									<Braces className="h-4 w-4" /> Firebase Auth
-								</li>
-							</ul>
-							<div className="flex-1" />
-							<Button variant="outline" className="w-full" asChild>
-								<a href="/docs">View Documentation →</a>
-							</Button>
-						</div>
-					</Card>
-
-					<Card className="p-6 border-2 hover:border-primary/50 transition-colors">
-						<div className="flex flex-col gap-4 h-full">
-							<div className="font-mono text-sm">
-								<div className="text-muted-foreground">
-									&#47;&#47; Get started
-								</div>
-								<code className="text-primary">Courses &amp; Tutor</code>
-							</div>
-							<p className="text-sm text-muted-foreground">
-								Sign in as a teacher to create courses, or as a student to join
-								with an invite code.
-							</p>
-							<div className="flex-1" />
-							<div className="flex flex-col gap-2">
-								<Button variant="default" className="w-full" asChild>
-									<Link href="/login">Log in →</Link>
-								</Button>
-								<Button variant="outline" className="w-full" asChild>
-									<Link href="/register">Create account</Link>
-								</Button>
-							</div>
-						</div>
-					</Card>
-				</div>
-
-				<TechIcons />
+				<section className="grid gap-4 md:grid-cols-3">
+					<div className="rounded-xl border border-brand/40 bg-brand/5 p-5">
+						<KeyRound className="mb-3 size-5 text-brand" />
+						<h2 className="font-medium">Unite con código</h2>
+						<p className="mt-1 text-sm text-muted-foreground">
+							Los estudiantes ingresan al curso con el código del docente.
+						</p>
+					</div>
+					<div className="rounded-xl border border-border bg-card p-5">
+						<GraduationCap className="mb-3 size-5" />
+						<h2 className="font-medium">Material indexado</h2>
+						<p className="mt-1 text-sm text-muted-foreground">
+							PDF, DOCX y texto se procesan para el RAG del curso.
+						</p>
+					</div>
+					<div className="rounded-xl border border-border bg-card p-5">
+						<Sparkles className="mb-3 size-5 text-brand" />
+						<h2 className="font-medium">Asistente por curso</h2>
+						<p className="mt-1 text-sm text-muted-foreground">
+							Cada clase tiene su propio tutor con historial guardado.
+						</p>
+					</div>
+				</section>
 			</main>
-
-			<footer className="flex justify-center gap-6 py-6 border-t z-20">
-				<span className="text-sm text-muted-foreground">
-					ship7 · based on NextRag boilerplate
-				</span>
-			</footer>
 		</div>
 	);
 }

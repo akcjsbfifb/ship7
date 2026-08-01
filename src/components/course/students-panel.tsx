@@ -1,7 +1,6 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { authFetch } from "@/lib/auth/client-api";
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
@@ -36,47 +35,49 @@ export function StudentsPanel({ courseId }: { courseId: string }) {
 	}, [load]);
 
 	return (
-		<Card>
-			<CardHeader>
-				<CardTitle>Alumnos inscriptos</CardTitle>
-			</CardHeader>
-			<CardContent>
-				{loading ? (
-					<p className="text-sm text-muted-foreground">Cargando…</p>
-				) : students.length === 0 ? (
-					<p className="text-sm text-muted-foreground">
-						Todavía no hay alumnos. Compartí el código de invitación.
-					</p>
-				) : (
-					<div className="overflow-x-auto">
-						<table className="w-full text-sm">
-							<thead>
-								<tr className="text-left text-muted-foreground border-b">
-									<th className="py-2 pr-4 font-medium">Nombre</th>
-									<th className="py-2 pr-4 font-medium">Email</th>
-									<th className="py-2 font-medium">Ingreso</th>
-								</tr>
-							</thead>
-							<tbody>
-								{students.map((s) => (
-									<tr key={s.id} className="border-b last:border-0">
-										<td className="py-2 pr-4">{s.name || "—"}</td>
-										<td className="py-2 pr-4">{s.email}</td>
-										<td className="py-2 text-muted-foreground">
-											{new Date(s.joinedAt).toLocaleDateString()}
-										</td>
-									</tr>
-								))}
-							</tbody>
-						</table>
-					</div>
-				)}
-				<div className="mt-4">
-					<Button variant="outline" size="sm" onClick={() => void load()}>
-						Actualizar
-					</Button>
-				</div>
-			</CardContent>
-		</Card>
+		<section>
+			<div className="mb-4 flex items-end justify-between border-b-2 border-brand pb-2">
+				<h2 className="text-xl font-semibold tracking-tight">
+					Estudiantes
+				</h2>
+				<span className="text-sm text-muted-foreground">
+					{students.length}
+				</span>
+			</div>
+
+			{loading ? (
+				<p className="text-sm text-muted-foreground">Cargando…</p>
+			) : students.length === 0 ? (
+				<p className="rounded-xl border border-dashed border-border px-4 py-10 text-center text-sm text-muted-foreground">
+					Todavía no hay alumnos. Compartí el código de invitación.
+				</p>
+			) : (
+				<ul className="divide-y divide-border">
+					{students.map((s) => (
+						<li key={s.id} className="flex items-center gap-3 py-3">
+							<div className="flex size-9 shrink-0 items-center justify-center rounded-full bg-secondary text-xs font-medium">
+								{(s.name || s.email).slice(0, 2).toUpperCase()}
+							</div>
+							<div className="min-w-0 flex-1">
+								<p className="truncate text-sm font-medium">
+									{s.name || "—"}
+								</p>
+								<p className="truncate text-xs text-muted-foreground">
+									{s.email}
+								</p>
+							</div>
+							<span className="shrink-0 text-xs text-muted-foreground">
+								{new Date(s.joinedAt).toLocaleDateString()}
+							</span>
+						</li>
+					))}
+				</ul>
+			)}
+			<div className="mt-4">
+				<Button variant="outline" size="sm" onClick={() => void load()}>
+					Actualizar
+				</Button>
+			</div>
+		</section>
 	);
 }

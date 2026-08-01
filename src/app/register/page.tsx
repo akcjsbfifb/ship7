@@ -1,6 +1,6 @@
 "use client";
 
-import { useAuth } from "@/components/auth/auth-provider";
+import { useAuth, type AppRole } from "@/components/auth/auth-provider";
 import { Navbar } from "@/components/navbar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -16,6 +16,7 @@ export default function RegisterPage() {
 	const [email, setEmail] = useState("");
 	const [password, setPassword] = useState("");
 	const [name, setName] = useState("");
+	const [role, setRole] = useState<AppRole>("STUDENT");
 	const [submitting, setSubmitting] = useState(false);
 
 	useEffect(() => {
@@ -28,7 +29,7 @@ export default function RegisterPage() {
 		e.preventDefault();
 		setSubmitting(true);
 		try {
-			await register({ email, password, name });
+			await register({ email, password, name, role });
 			toast.success("Cuenta creada");
 			router.push("/dashboard");
 		} catch (err) {
@@ -41,7 +42,7 @@ export default function RegisterPage() {
 	const handleGoogle = async () => {
 		setSubmitting(true);
 		try {
-			await loginWithGoogle();
+			await loginWithGoogle({ role });
 			toast.success("Listo");
 			router.push("/dashboard");
 		} catch (err) {
@@ -55,14 +56,17 @@ export default function RegisterPage() {
 		<div className="min-h-screen flex flex-col">
 			<Navbar />
 			<main className="flex-1 flex items-center justify-center px-4 py-12">
-				<Card className="w-full max-w-md">
+				<Card className="w-full max-w-md shadow-none">
 					<CardHeader>
-						<CardTitle className="font-mono text-2xl">Create account</CardTitle>
+						<CardTitle className="text-2xl">Crear cuenta</CardTitle>
+						<p className="text-sm text-muted-foreground">
+							Registrate como alumno o docente en EducAI.
+						</p>
 					</CardHeader>
 					<CardContent className="space-y-4">
 						<form onSubmit={handleSubmit} className="space-y-4">
 							<Input
-								placeholder="Name (optional)"
+								placeholder="Nombre (opcional)"
 								value={name}
 								onChange={(e) => setName(e.target.value)}
 							/>
@@ -75,14 +79,37 @@ export default function RegisterPage() {
 							/>
 							<Input
 								type="password"
-								placeholder="Password (min 6)"
+								placeholder="Contraseña (mín. 6)"
 								value={password}
 								onChange={(e) => setPassword(e.target.value)}
 								minLength={6}
 								required
 							/>
-							<Button type="submit" className="w-full" disabled={submitting}>
-								{submitting ? "Creating…" : "Register"}
+							<div className="space-y-2">
+								<p className="text-sm text-muted-foreground">Soy…</p>
+								<div className="grid grid-cols-2 gap-2">
+									<Button
+										type="button"
+										variant={role === "STUDENT" ? "default" : "outline"}
+										onClick={() => setRole("STUDENT")}
+									>
+										Alumno
+									</Button>
+									<Button
+										type="button"
+										variant={role === "TEACHER" ? "default" : "outline"}
+										onClick={() => setRole("TEACHER")}
+									>
+										Docente
+									</Button>
+								</div>
+							</div>
+							<Button
+								type="submit"
+								className="w-full bg-brand text-brand-foreground hover:bg-brand/90"
+								disabled={submitting}
+							>
+								{submitting ? "Creando…" : "Registrarme"}
 							</Button>
 						</form>
 						<div className="relative">
@@ -90,7 +117,7 @@ export default function RegisterPage() {
 								<span className="w-full border-t" />
 							</div>
 							<div className="relative flex justify-center text-xs uppercase">
-								<span className="bg-card px-2 text-muted-foreground">or</span>
+								<span className="bg-card px-2 text-muted-foreground">o</span>
 							</div>
 						</div>
 						<Button
@@ -100,12 +127,16 @@ export default function RegisterPage() {
 							disabled={submitting}
 							onClick={handleGoogle}
 						>
-							Continue with Google
+							Continuar con Google
 						</Button>
+						<p className="text-xs text-muted-foreground text-center">
+							Con Google se usa el rol seleccionado arriba solo en el primer
+							ingreso.
+						</p>
 						<p className="text-sm text-muted-foreground text-center">
-							Already have an account?{" "}
+							¿Ya tenés cuenta?{" "}
 							<Link href="/login" className="text-primary underline-offset-4 hover:underline">
-								Log in
+								Iniciar sesión
 							</Link>
 						</p>
 					</CardContent>

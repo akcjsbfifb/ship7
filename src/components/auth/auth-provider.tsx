@@ -22,6 +22,8 @@ import {
 import { auth, googleProvider } from "@/lib/firebase/client";
 import { toAuthError } from "@/lib/auth/firebase-errors";
 
+export type AppRole = "TEACHER" | "STUDENT";
+
 type AuthContextValue = {
 	firebaseUser: FirebaseUser | null;
 	loading: boolean;
@@ -31,10 +33,14 @@ type AuthContextValue = {
 		email: string;
 		password: string;
 		name?: string;
+		role: AppRole;
 	}) => Promise<void>;
-	loginWithGoogle: () => Promise<void>;
+	loginWithGoogle: (opts?: { role?: AppRole }) => Promise<void>;
 	logout: () => Promise<void>;
-	syncProfile: (opts?: { name?: string }) => Promise<unknown>;
+	syncProfile: (opts?: {
+		role?: AppRole;
+		name?: string;
+	}) => Promise<unknown>;
 };
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -56,7 +62,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 	}, []);
 
 	const syncProfile = useCallback(
-		async (opts?: { name?: string }) => {
+		async (opts?: { role?: AppRole; name?: string }) => {
 			try {
 				const token = await getIdToken();
 				if (!token) throw new Error("Not authenticated");
@@ -99,17 +105,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 			email,
 			password,
 			name,
+			role,
 		}: {
 			email: string;
 			password: string;
 			name?: string;
+			role: AppRole;
 		}) => {
 			try {
 				const cred = await createUserWithEmailAndPassword(auth, email, password);
 				if (name?.trim()) {
 					await updateProfile(cred.user, { displayName: name.trim() });
 				}
-				await syncProfile({ name: name?.trim() });
+				await syncProfile({ role, name: name?.trim() });
 			} catch (err) {
 				throw toAuthError(err);
 			}
@@ -117,15 +125,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 		[syncProfile],
 	);
 
-	const loginWithGoogle = useCallback(async () => {
-		try {
-			const result = await signInWithPopup(auth, googleProvider);
-			const name = result.user.displayName?.trim() || undefined;
-			await syncProfile(name ? { name } : undefined);
-		} catch (err) {
-			throw toAuthError(err);
-		}
-	}, [syncProfile]);
+	const loginWithGoogle = useCallback(
+		async (opts?: { role?: AppRole }) => {
+			try {
+				const result = await signInWithPopup(auth, googleProvider);
+				const name = result.user.displayName?.trim() || undefined;
+				await syncProfile({
+					...(opts?.role ? { role: opts.role } : {}),
+					...(name ? { name } : {}),
+				});
+			} catch (err) {
+				throw toAuthError(err);
+			}
+		},
+		[syncProfile],
+	);
 
 	const logout = useCallback(async () => {
 		await signOut(auth);

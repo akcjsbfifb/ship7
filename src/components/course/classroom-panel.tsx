@@ -1,7 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { authFetch, getIdToken } from "@/lib/auth/client-api";
@@ -189,28 +189,35 @@ export function ClassroomPanel({
 	return (
 		<div className="space-y-4">
 			{isTeacher && (
-				<Card>
-					<CardHeader>
-						<CardTitle>Nuevo tema</CardTitle>
-					</CardHeader>
-					<CardContent>
-						<form onSubmit={createTopic} className="flex flex-col sm:flex-row gap-2">
-							<Input
-								placeholder="Ej: Unidad 1 — Introducción"
-								value={newTitle}
-								onChange={(e) => setNewTitle(e.target.value)}
-								required
-							/>
-							<Button type="submit" disabled={busy}>
-								Crear tema
-							</Button>
-						</form>
-					</CardContent>
-				</Card>
+				<div className="flex items-start gap-2.5 rounded-xl border border-brand/30 bg-brand/5 px-4 py-3 text-sm text-muted-foreground">
+					Todo el material que subas se indexa automáticamente para el tutor IA
+					del curso.
+				</div>
+			)}
+
+			{isTeacher && (
+				<form
+					onSubmit={createTopic}
+					className="flex flex-col gap-2 rounded-xl border border-border bg-card p-4 sm:flex-row"
+				>
+					<Input
+						placeholder="Ej: Unidad 1 — Introducción"
+						value={newTitle}
+						onChange={(e) => setNewTitle(e.target.value)}
+						required
+					/>
+					<Button
+						type="submit"
+						disabled={busy}
+						className="bg-brand text-brand-foreground hover:bg-brand/90"
+					>
+						Crear tema
+					</Button>
+				</form>
 			)}
 
 			{topics.length === 0 ? (
-				<p className="text-sm text-muted-foreground">
+				<p className="rounded-xl border border-dashed border-border px-4 py-10 text-center text-sm text-muted-foreground">
 					{isTeacher
 						? "Creá un tema y subí archivos (PDF, DOCX, TXT) o pegá texto."
 						: "Todavía no hay material publicado."}
@@ -219,10 +226,10 @@ export function ClassroomPanel({
 				topics.map((topic) => {
 					const open = openIds[topic.id] ?? true;
 					return (
-						<Card key={topic.id}>
+						<Card key={topic.id} className="overflow-hidden shadow-none">
 							<button
 								type="button"
-								className="w-full flex items-center gap-2 p-4 text-left hover:bg-muted/40"
+								className="flex w-full items-center gap-2 p-4 text-left hover:bg-muted/40"
 								onClick={() =>
 									setOpenIds((s) => ({ ...s, [topic.id]: !open }))
 								}
@@ -232,10 +239,9 @@ export function ClassroomPanel({
 								) : (
 									<ChevronRight className="h-4 w-4 shrink-0" />
 								)}
-								<span className="font-semibold flex-1">{topic.title}</span>
-								<span className="text-xs text-muted-foreground">
-									{topic.materials.length} archivo
-									{topic.materials.length === 1 ? "" : "s"}
+								<span className="flex-1 font-semibold">{topic.title}</span>
+								<span className="rounded-md bg-secondary px-2 py-0.5 font-mono text-[11px] text-muted-foreground">
+									{topic.materials.length}
 								</span>
 							</button>
 							{open && (

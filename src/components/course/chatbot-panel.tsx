@@ -4,7 +4,14 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { authFetch, getIdToken } from "@/lib/auth/client-api";
 import { useChat } from "ai/react";
-import { FileText, Loader2, MessageSquarePlus, Trash2, Upload } from "lucide-react";
+import {
+	Bot,
+	FileText,
+	Loader2,
+	MessageSquarePlus,
+	Trash2,
+	Upload,
+} from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import { toast } from "sonner";
@@ -378,11 +385,8 @@ function ChatbotInner({
 		}
 	};
 
-	const activeTitle =
-		threads.find((t) => t.id === activeThreadId)?.title || "Conversación";
-
 	return (
-		<div className="grid h-[min(72vh,680px)] grid-cols-1 overflow-hidden rounded-xl border bg-card lg:grid-cols-[260px_1fr]">
+		<div className="grid h-full min-h-[min(72vh,680px)] grid-cols-1 overflow-hidden rounded-xl border border-border bg-card lg:grid-cols-[minmax(260px,320px)_1fr]">
 			<aside className="flex min-h-0 flex-col border-b lg:border-b-0 lg:border-r">
 				<div className="flex shrink-0 items-center justify-between gap-2 border-b px-3 py-2.5">
 					<h3 className="text-sm font-semibold">Conversaciones</h3>
@@ -398,67 +402,69 @@ function ChatbotInner({
 						Nueva
 					</Button>
 				</div>
-
-				<div className="min-h-0 flex-1 overflow-y-auto px-2 py-2 space-y-4">
+				<div className="max-h-40 min-h-0 shrink-0 overflow-y-auto border-b px-2 py-2">
 					<ul className="space-y-1">
-						{threads.map((t) => {
-							const active = t.id === activeThreadId;
-							return (
-								<li key={t.id} className="group relative">
+						{threads.map((t) => (
+							<li key={t.id}>
+								<div
+									className={`group flex items-center gap-1 rounded-md ${
+										t.id === activeThreadId
+											? "bg-brand/10 text-foreground"
+											: "hover:bg-muted"
+									}`}
+								>
 									<button
 										type="button"
+										className="min-w-0 flex-1 px-2 py-1.5 text-left text-xs"
 										onClick={() => void onSelectThread(t.id)}
-										className={`w-full rounded-md px-2 py-2 pr-8 text-left text-xs transition-colors ${
-											active
-												? "bg-muted font-medium"
-												: "hover:bg-muted/60 text-muted-foreground"
-										}`}
 									>
-										<div className="line-clamp-2">{t.title}</div>
-										<div className="mt-0.5 text-[10px] opacity-70">
-											{new Date(t.updatedAt).toLocaleString()}
-										</div>
+										<div className="truncate font-medium">{t.title}</div>
+										{t.preview && (
+											<div className="truncate text-[11px] text-muted-foreground">
+												{t.preview}
+											</div>
+										)}
 									</button>
 									<button
 										type="button"
-										className="absolute right-1 top-2 rounded p-1 opacity-0 hover:bg-background group-hover:opacity-100"
-										title="Eliminar conversación"
-										onClick={(e) => {
-											e.stopPropagation();
-											void onDeleteThread(t.id);
-										}}
+										className="mr-1 rounded p-1 text-muted-foreground opacity-0 hover:bg-background hover:text-destructive group-hover:opacity-100"
+										title="Borrar"
+										onClick={() => void onDeleteThread(t.id)}
 									>
-										<Trash2 className="h-3 w-3 text-muted-foreground" />
+										<Trash2 className="h-3.5 w-3.5" />
 									</button>
-								</li>
-							);
-						})}
+								</div>
+							</li>
+						))}
 					</ul>
+				</div>
 
-					<div className="border-t pt-3 px-1">
-						<p className="mb-2 text-xs font-medium text-muted-foreground uppercase tracking-wide">
-							Material
+				<div className="shrink-0 border-b px-4 py-3">
+					<h3 className="text-sm font-semibold">Fuentes</h3>
+					<p className="text-xs text-muted-foreground">
+						Material indexado que usa el tutor
+					</p>
+				</div>
+				<div className="min-h-0 flex-1 overflow-y-auto px-3 py-2">
+					{materials.length === 0 ? (
+						<p className="text-xs text-muted-foreground">
+							Sin material indexado todavía.
 						</p>
-						{materials.length === 0 ? (
-							<p className="text-xs text-muted-foreground">
-								Sin material indexado todavía.
-							</p>
-						) : (
-							<ul className="space-y-2">
-								{materials.map((m) => (
-									<li key={m.id} className="flex gap-2 text-sm">
-										<FileText className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" />
-										<div className="min-w-0">
-											<div className="truncate font-medium text-xs">{m.title}</div>
-											<div className="truncate text-[10px] text-muted-foreground">
-												{m.topicTitle} · {m.status}
-											</div>
+					) : (
+						<ul className="space-y-2">
+							{materials.map((m) => (
+								<li key={m.id} className="flex gap-2 text-sm">
+									<FileText className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" />
+									<div className="min-w-0">
+										<div className="truncate font-medium">{m.title}</div>
+										<div className="truncate text-xs text-muted-foreground">
+											{m.topicTitle} · {m.status}
 										</div>
-									</li>
-								))}
-							</ul>
-						)}
-					</div>
+									</div>
+								</li>
+							))}
+						</ul>
+					)}
 				</div>
 
 				{isTeacher && (
@@ -477,7 +483,9 @@ function ChatbotInner({
 								))}
 							</select>
 						) : (
-							<p className="text-xs text-amber-600">Creá un tema en Material.</p>
+							<p className="text-xs text-amber-600">
+								Creá un tema en Material.
+							</p>
 						)}
 						<label className="block">
 							<input
@@ -543,19 +551,27 @@ function ChatbotInner({
 			</aside>
 
 			<section className="flex min-h-0 min-w-0 flex-col">
-				<div className="shrink-0 border-b px-4 py-2.5">
-					<h3 className="text-sm font-semibold truncate">{activeTitle}</h3>
-					<p className="text-[11px] text-muted-foreground">
-						Cada conversación tiene su propio historial. “Nueva” empieza en
-						blanco.
-					</p>
+				<div className="shrink-0 border-b px-4 py-3">
+					<div className="flex items-center gap-2">
+						<span className="flex size-8 items-center justify-center rounded-lg border border-brand/40 bg-brand/10 text-brand">
+							<Bot className="size-4" />
+						</span>
+						<div>
+							<h3 className="text-sm font-semibold leading-tight">
+								Asistente IA
+							</h3>
+							<p className="text-xs text-muted-foreground">
+								Responde con el material del curso
+							</p>
+						</div>
+					</div>
 				</div>
 
 				<div className="min-h-0 flex-1 overflow-y-auto px-4 py-3">
 					<div className="space-y-3">
 						{messages.length === 0 && (
 							<p className="py-10 text-center text-sm text-muted-foreground">
-								Conversación nueva. Preguntá sobre el material del curso.
+								Preguntá sobre el material del curso. El historial se guarda.
 							</p>
 						)}
 						{messages.map((m) => (
@@ -591,16 +607,20 @@ function ChatbotInner({
 
 				<form
 					onSubmit={onSubmit}
-					className="flex shrink-0 gap-2 border-t bg-card p-3"
+					className="flex shrink-0 gap-2 border-t bg-background/80 p-3 backdrop-blur-md"
 				>
 					<input
 						value={input}
 						onChange={handleInputChange}
-						placeholder="Preguntá…"
-						className="flex-1 rounded-md border bg-background p-2 text-sm"
+						placeholder="Escribí una consulta para la IA del curso…"
+						className="flex-1 rounded-2xl border bg-background px-4 py-2.5 text-sm"
 						disabled={isLoading}
 					/>
-					<Button type="submit" disabled={isLoading}>
+					<Button
+						type="submit"
+						disabled={isLoading}
+						className="rounded-full bg-brand text-brand-foreground hover:bg-brand/90"
+					>
 						{isLoading ? "…" : "Enviar"}
 					</Button>
 				</form>
