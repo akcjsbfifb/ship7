@@ -1,31 +1,41 @@
 import { NextResponse } from 'next/server';
+
 import { healthCheck } from '@/lib/db/pg';
 
-export async function GET() {
-  console.log('in pg route');
+/**
+ * Liveness by default (no DB) so Coolify/Docker don't mark the app
+ * unhealthy when Postgres briefly restarts.
+ * Use ?db=1 for a readiness probe that checks the database.
+ */
+export async function GET(req: Request) {
+  const url = new URL(req.url);
+  const checkDb = url.searchParams.get('db') === '1';
+
+  if (!checkDb) {
+    return NextResponse.json({ ok: true, status: 'alive' });
+  }
+
   try {
     const isHealthy = await healthCheck();
     if (!isHealthy) {
       return NextResponse.json(
         { error: 'Database is not healthy' },
-        { status: 500 }
+        { status: 503 },
       );
-    } else {
-      console.log('Database is healthy');
-      return NextResponse.json({ message: 'Database is healthy' });
     }
-  } catch (error: any) {
-    console.error('Database error details:', {
-      code: error.code,
-      message: error.message,
-      stack: error.stack,
+    return NextResponse.json({ ok: true, status: 'ready' });
+  } catch (error: unknown) {
+    const err = error as { code?: string; message?: string };
+    console.error('Database healthcheck failed:', {
+      code: err.code,
+      message: err.message,
     });
 
     const errorMessage =
-      error.code === 'ECONNREFUSED'
-        ? 'Unable to connect to database - please check if PostgreSQL is running'
-        : 'Failed to fetch data';
+      err.code === 'ECONNREFUSED'
+        ? 'Unable to connect to database'
+        : 'Failed to check database';
 
-    return NextResponse.json({ error: errorMessage }, { status: 500 });
+    return NextResponse.json({ error: errorMessage }, { status: 503 });
   }
 }
