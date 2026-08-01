@@ -1,6 +1,6 @@
 "use client";
 
-import { type AppRole, useAuth } from "@/components/auth/auth-provider";
+import { useAuth } from "@/components/auth/auth-provider";
 import { Navbar } from "@/components/navbar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -16,7 +16,6 @@ export default function RegisterPage() {
 	const [email, setEmail] = useState("");
 	const [password, setPassword] = useState("");
 	const [name, setName] = useState("");
-	const [role, setRole] = useState<AppRole>("STUDENT");
 	const [submitting, setSubmitting] = useState(false);
 
 	useEffect(() => {
@@ -29,7 +28,7 @@ export default function RegisterPage() {
 		e.preventDefault();
 		setSubmitting(true);
 		try {
-			await register({ email, password, name, role });
+			await register({ email, password, name });
 			toast.success("Cuenta creada");
 			router.push("/dashboard");
 		} catch (err) {
@@ -42,7 +41,7 @@ export default function RegisterPage() {
 	const handleGoogle = async () => {
 		setSubmitting(true);
 		try {
-			await loginWithGoogle({ role });
+			await loginWithGoogle();
 			toast.success("Listo");
 			router.push("/dashboard");
 		} catch (err) {
@@ -58,11 +57,12 @@ export default function RegisterPage() {
 		<div className="min-h-screen flex flex-col">
 			<Navbar />
 			<main className="flex-1 flex items-center justify-center px-4 py-12">
-				<Card className="w-full max-w-md shadow-none">
+				<Card className="w-full max-w-md border-brand shadow-none">
 					<CardHeader>
 						<CardTitle className="text-2xl">Crear cuenta</CardTitle>
 						<p className="text-sm text-muted-foreground">
-							Registrate como alumno o docente en Bookworm.
+							Registrate en Bookworm para crear cursos o unirte a los que ya
+							existen.
 						</p>
 					</CardHeader>
 					<CardContent className="space-y-4">
@@ -87,25 +87,6 @@ export default function RegisterPage() {
 								minLength={6}
 								required
 							/>
-							<div className="space-y-2">
-								<p className="text-sm text-muted-foreground">Soy…</p>
-								<div className="grid grid-cols-2 gap-2">
-									<Button
-										type="button"
-										variant={role === "STUDENT" ? "default" : "outline"}
-										onClick={() => setRole("STUDENT")}
-									>
-										Alumno
-									</Button>
-									<Button
-										type="button"
-										variant={role === "TEACHER" ? "default" : "outline"}
-										onClick={() => setRole("TEACHER")}
-									>
-										Docente
-									</Button>
-								</div>
-							</div>
 							<Button
 								type="submit"
 								className="w-full bg-brand text-brand-foreground hover:bg-brand/90"
@@ -131,10 +112,6 @@ export default function RegisterPage() {
 						>
 							Continuar con Google
 						</Button>
-						<p className="text-xs text-muted-foreground text-center">
-							Con Google se usa el rol seleccionado arriba solo en el primer
-							ingreso.
-						</p>
 						<p className="text-sm text-muted-foreground text-center">
 							¿Ya tenés cuenta?{" "}
 							<Link

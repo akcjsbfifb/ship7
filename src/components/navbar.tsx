@@ -71,8 +71,12 @@ export function Navbar() {
 								</Button>
 							</div>
 						) : (
-							<Button variant="default" size="sm" asChild>
-								<Link href="/login">Log in</Link>
+							<Button
+								size="sm"
+								asChild
+								className="bg-brand text-brand-foreground hover:bg-brand/90"
+							>
+								<Link href="/login">Ingresar</Link>
 							</Button>
 						))}
 					<ThemeToggle />

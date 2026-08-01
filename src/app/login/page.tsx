@@ -58,7 +58,7 @@ export default function LoginPage() {
 		<div className="min-h-screen flex flex-col">
 			<Navbar />
 			<main className="flex-1 flex items-center justify-center px-4 py-12">
-				<Card className="w-full max-w-md shadow-none">
+				<Card className="w-full max-w-md border-brand shadow-none">
 					<CardHeader>
 						<CardTitle className="text-2xl">Iniciar sesión</CardTitle>
 						<p className="text-sm text-muted-foreground">

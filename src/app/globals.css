@@ -23,10 +23,10 @@
 		--destructive-foreground: 0 0% 98%;
 		--border: 30 18% 84%;
 		--input: 30 18% 84%;
-		/* Teal from mortarboard / chat (#228E9D) */
-		--ring: 187 64% 37%;
-		--brand: 187 64% 37%;
-		--brand-foreground: 36 40% 98%;
+		/* Lime green from Bookworm favicon / worm (#8CCC1C) */
+		--ring: 82 76% 45%;
+		--brand: 82 76% 45%;
+		--brand-foreground: 90 40% 10%;
 		/* Amber accent from icons (#ED8F27) */
 		--warm: 30 85% 54%;
 		--warm-foreground: 24 60% 12%;
@@ -54,9 +54,9 @@
 		--destructive-foreground: 0 0% 98%;
 		--border: 200 8% 22%;
 		--input: 200 8% 22%;
-		--ring: 187 45% 48%;
-		--brand: 187 45% 48%;
-		--brand-foreground: 200 20% 8%;
+		--ring: 82 70% 52%;
+		--brand: 82 70% 52%;
+		--brand-foreground: 90 40% 8%;
 		--warm: 30 75% 55%;
 		--warm-foreground: 36 40% 96%;
 		--cream: 30 20% 18%;
@@ -72,7 +72,7 @@
 		background-image:
 			radial-gradient(
 				ellipse 80% 50% at 100% -10%,
-				hsl(187 64% 37% / 0.07),
+				hsl(82 76% 45% / 0.07),
 				transparent 55%
 			),
 			radial-gradient(

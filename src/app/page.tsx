@@ -161,7 +161,7 @@ export default function Home() {
 							</p>
 						</div>
 						<div className="cut-brackets relative p-1.5">
-							<div className="cut-lg bg-brand p-6 text-brand-foreground">
+							<div className="cut-lg border border-brand/35 bg-brand/10 p-6">
 								<Image
 									src="/logos/chat.svg"
 									alt="Conversación de preguntas y respuestas"
@@ -169,7 +169,7 @@ export default function Home() {
 									height={72}
 								/>
 								<h3 className="mt-4 font-medium">Cada curso tiene su chat</h3>
-								<p className="mt-1 text-sm leading-relaxed opacity-90">
+								<p className="mt-1 text-sm leading-relaxed text-muted-foreground">
 									El alumno pregunta lo que no entiende, cuando lo necesita, sin
 									esperar la próxima clase.
 								</p>
@@ -226,7 +226,7 @@ export default function Home() {
 						<Button
 							asChild
 							size="lg"
-							className="cut-sm bg-warm text-warm-foreground hover:bg-warm/90"
+							className="cut-sm bg-brand text-brand-foreground hover:bg-brand/90"
 						>
 							<Link href="/register">Crear cuenta</Link>
 						</Button>
