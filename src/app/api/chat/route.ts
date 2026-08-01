@@ -7,6 +7,7 @@ import { handleError } from '@/lib/auth/http';
 import { requireCourseAccess } from '@/lib/auth/require-course-access';
 import { requireUser } from '@/lib/auth/require-user';
 import { prisma } from '@/lib/db/client';
+import { buildTutorSystemPrompt } from '@/lib/tutor/build-system-prompt';
 
 export const maxDuration = 30;
 
@@ -18,45 +19,58 @@ type SearchRow = {
   courseId?: string;
 };
 
-async function getOrCreateThread(courseId: string, userId: string) {
-  return prisma.chatThread.upsert({
-    where: { courseId_userId: { courseId, userId } },
-    create: { courseId, userId },
-    update: {},
-  });
-}
-
 export async function POST(req: Request) {
   try {
     const { user } = await requireUser(req);
 
-    const { messages, courseId } = await req.json();
+    const { messages, courseId, threadId } = await req.json();
 
     if (!courseId || typeof courseId !== 'string') {
       return handleError(new AuthError('courseId is required', 400));
     }
+    if (!threadId || typeof threadId !== 'string') {
+      return handleError(new AuthError('threadId is required', 400));
+    }
 
-    await requireCourseAccess(user, courseId);
+    const course = await requireCourseAccess(user, courseId);
+
+    const thread = await prisma.chatThread.findFirst({
+      where: { id: threadId, courseId, userId: user.id },
+    });
+    if (!thread) {
+      return handleError(new AuthError('Thread not found', 404));
+    }
 
     const lastMessage = messages[messages.length - 1];
     if (!lastMessage?.content) {
       return handleError(new AuthError('message content is required', 400));
     }
 
-    const thread = await getOrCreateThread(courseId, user.id);
+    const systemPrompt = buildTutorSystemPrompt(course);
+    const userText = String(lastMessage.content);
+
     await prisma.chatMessage.create({
       data: {
         threadId: thread.id,
         role: 'user',
-        content: String(lastMessage.content),
+        content: userText,
       },
     });
+
+    // Auto-title from first user message
+    if (!thread.title) {
+      await prisma.chatThread.update({
+        where: { id: thread.id },
+        data: { title: userText.slice(0, 80) },
+      });
+    }
 
     const data = new StreamData();
 
     const searchResults = (await searchSimilarChunks(
-      lastMessage.content,
+      userText,
       courseId,
+      8,
     )) as SearchRow[];
 
     const contextDetails = searchResults?.length
@@ -100,8 +114,7 @@ export async function POST(req: Request) {
       messages: [
         {
           role: 'system',
-          content:
-            'You are EduAI, a helpful educational assistant for students. Use the provided course context to answer questions when available. Always start your response with a brief mention of which context you used, if any. Stay within the course material.',
+          content: systemPrompt,
         },
         ...(context
           ? [

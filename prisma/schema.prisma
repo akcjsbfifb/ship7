@@ -31,18 +31,20 @@ model User {
 }
 
 model Course {
-  id          String        @id @default(cuid())
-  title       String
-  description String?
-  inviteCode  String        @unique
-  teacherId   String
-  teacher     User          @relation("CourseTeacher", fields: [teacherId], references: [id])
-  enrollments Enrollment[]
-  topics      CourseTopic[]
-  materials   Material[]
-  chatThreads ChatThread[]
-  createdAt   DateTime      @default(now())
-  updatedAt   DateTime      @updatedAt
+  id                String        @id @default(cuid())
+  title             String
+  description       String?
+  inviteCode        String        @unique
+  teacherId         String
+  teacher           User          @relation("CourseTeacher", fields: [teacherId], references: [id])
+  tutorInstructions String?
+  tutorPresetKeys   String[]      @default([])
+  enrollments       Enrollment[]
+  topics            CourseTopic[]
+  materials         Material[]
+  chatThreads       ChatThread[]
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
 }
 
 model Enrollment {
@@ -102,8 +104,8 @@ model ChatThread {
   course    Course        @relation(fields: [courseId], references: [id], onDelete: Cascade)
   user      User          @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  @@unique([courseId, userId])
   @@index([courseId])
+  @@index([courseId, userId])
 }
 
 model ChatMessage {

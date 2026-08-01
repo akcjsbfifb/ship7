@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { authFetch, getIdToken } from "@/lib/auth/client-api";
 import { useChat } from "ai/react";
-import { FileText, Loader2, Upload } from "lucide-react";
+import { FileText, Loader2, MessageSquarePlus, Trash2, Upload } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import { toast } from "sonner";
@@ -28,6 +28,14 @@ type ChatMessage = {
 	content: string;
 };
 
+type ThreadSummary = {
+	id: string;
+	title: string;
+	updatedAt: string;
+	messageCount: number;
+	preview: string | null;
+};
+
 export function ChatbotPanel({
 	courseId,
 	isTeacher,
@@ -37,8 +45,10 @@ export function ChatbotPanel({
 }) {
 	const [materials, setMaterials] = useState<MaterialRow[]>([]);
 	const [topics, setTopics] = useState<Topic[]>([]);
-	const [historyLoaded, setHistoryLoaded] = useState(false);
+	const [threads, setThreads] = useState<ThreadSummary[]>([]);
+	const [activeThreadId, setActiveThreadId] = useState<string | null>(null);
 	const [initialMessages, setInitialMessages] = useState<ChatMessage[]>([]);
+	const [ready, setReady] = useState(false);
 	const [uploadTopicId, setUploadTopicId] = useState("");
 	const [pasteOpen, setPasteOpen] = useState(false);
 	const [pasteText, setPasteText] = useState("");
@@ -61,39 +71,137 @@ export function ChatbotPanel({
 		}
 	}, [courseId]);
 
+	const loadThreads = useCallback(async () => {
+		const res = await authFetch(`/api/courses/${courseId}/chat/threads`);
+		const data = await res.json();
+		if (!res.ok) throw new Error(data.error || "Error al cargar chats");
+		return (data.threads ?? []) as ThreadSummary[];
+	}, [courseId]);
+
+	const loadThreadMessages = useCallback(
+		async (threadId: string) => {
+			const res = await authFetch(
+				`/api/courses/${courseId}/chat?threadId=${encodeURIComponent(threadId)}`,
+			);
+			const data = await res.json();
+			if (!res.ok) throw new Error(data.error || "Error al cargar mensajes");
+			return (data.messages ?? [])
+				.filter(
+					(m: { role: string }) => m.role === "user" || m.role === "assistant",
+				)
+				.map((m: ChatMessage) => ({
+					id: m.id,
+					role: m.role,
+					content: m.content,
+				})) as ChatMessage[];
+		},
+		[courseId],
+	);
+
+	const createThread = useCallback(async () => {
+		const res = await authFetch(`/api/courses/${courseId}/chat/threads`, {
+			method: "POST",
+			body: JSON.stringify({}),
+		});
+		const data = await res.json();
+		if (!res.ok) throw new Error(data.error || "No se pudo crear el chat");
+		return data.thread as ThreadSummary;
+	}, [courseId]);
+
 	useEffect(() => {
 		let cancelled = false;
 		void (async () => {
 			try {
-				const res = await authFetch(`/api/courses/${courseId}/chat`);
-				const data = await res.json();
-				if (!res.ok) throw new Error(data.error || "Error");
+				setReady(false);
+				let list = await loadThreads();
 				if (cancelled) return;
-				setInitialMessages(
-					(data.messages ?? [])
-						.filter(
-							(m: { role: string }) =>
-								m.role === "user" || m.role === "assistant",
-						)
-						.map((m: ChatMessage) => ({
-							id: m.id,
-							role: m.role,
-							content: m.content,
-						})),
-				);
+
+				if (list.length === 0) {
+					const created = await createThread();
+					if (cancelled) return;
+					list = [created];
+				}
+
+				setThreads(list);
+				const firstId = list[0].id;
+				setActiveThreadId(firstId);
+				const msgs = await loadThreadMessages(firstId);
+				if (cancelled) return;
+				setInitialMessages(msgs);
+				await loadMaterials();
 			} catch (err) {
 				toast.error(err instanceof Error ? err.message : "Error chat");
 			} finally {
-				if (!cancelled) setHistoryLoaded(true);
+				if (!cancelled) setReady(true);
 			}
-			if (!cancelled) await loadMaterials();
 		})();
 		return () => {
 			cancelled = true;
 		};
-	}, [courseId, loadMaterials]);
+	}, [courseId, loadThreads, createThread, loadThreadMessages, loadMaterials]);
 
-	if (!historyLoaded) {
+	const selectThread = async (threadId: string) => {
+		if (threadId === activeThreadId) return;
+		try {
+			const msgs = await loadThreadMessages(threadId);
+			setInitialMessages(msgs);
+			setActiveThreadId(threadId);
+		} catch (err) {
+			toast.error(err instanceof Error ? err.message : "Error");
+		}
+	};
+
+	const newConversation = async () => {
+		try {
+			const created = await createThread();
+			setThreads((prev) => [created, ...prev]);
+			setInitialMessages([]);
+			setActiveThreadId(created.id);
+		} catch (err) {
+			toast.error(err instanceof Error ? err.message : "Error");
+		}
+	};
+
+	const deleteThread = async (threadId: string) => {
+		try {
+			const res = await authFetch(
+				`/api/courses/${courseId}/chat/threads?threadId=${encodeURIComponent(threadId)}`,
+				{ method: "DELETE" },
+			);
+			const data = await res.json();
+			if (!res.ok) throw new Error(data.error || "No se pudo borrar");
+
+			let next = threads.filter((t) => t.id !== threadId);
+			if (next.length === 0) {
+				const created = await createThread();
+				next = [created];
+			}
+			setThreads(next);
+
+			if (activeThreadId === threadId) {
+				const nextId = next[0].id;
+				setActiveThreadId(nextId);
+				if (next[0].messageCount === 0) {
+					setInitialMessages([]);
+				} else {
+					setInitialMessages(await loadThreadMessages(nextId));
+				}
+			}
+		} catch (err) {
+			toast.error(err instanceof Error ? err.message : "Error");
+		}
+	};
+
+	const refreshThreadList = useCallback(async () => {
+		try {
+			const list = await loadThreads();
+			setThreads(list);
+		} catch {
+			/* ignore */
+		}
+	}, [loadThreads]);
+
+	if (!ready || !activeThreadId) {
 		return (
 			<div className="flex h-[min(70vh,640px)] items-center justify-center rounded-xl border text-sm text-muted-foreground">
 				Cargando chat…
@@ -103,10 +211,17 @@ export function ChatbotPanel({
 
 	return (
 		<ChatbotInner
-			key={courseId}
+			key={activeThreadId}
 			courseId={courseId}
+			threadId={activeThreadId}
 			isTeacher={isTeacher}
 			initialMessages={initialMessages}
+			threads={threads}
+			activeThreadId={activeThreadId}
+			onSelectThread={selectThread}
+			onNewConversation={newConversation}
+			onDeleteThread={deleteThread}
+			onConversationUpdated={refreshThreadList}
 			materials={materials}
 			topics={topics}
 			uploadTopicId={uploadTopicId}
@@ -124,8 +239,15 @@ export function ChatbotPanel({
 
 function ChatbotInner({
 	courseId,
+	threadId,
 	isTeacher,
 	initialMessages,
+	threads,
+	activeThreadId,
+	onSelectThread,
+	onNewConversation,
+	onDeleteThread,
+	onConversationUpdated,
 	materials,
 	topics,
 	uploadTopicId,
@@ -139,8 +261,15 @@ function ChatbotInner({
 	reloadMaterials,
 }: {
 	courseId: string;
+	threadId: string;
 	isTeacher: boolean;
 	initialMessages: ChatMessage[];
+	threads: ThreadSummary[];
+	activeThreadId: string;
+	onSelectThread: (id: string) => void;
+	onNewConversation: () => void;
+	onDeleteThread: (id: string) => void;
+	onConversationUpdated: () => void;
 	materials: MaterialRow[];
 	topics: Topic[];
 	uploadTopicId: string;
@@ -157,7 +286,7 @@ function ChatbotInner({
 	const { messages, input, handleInputChange, handleSubmit, isLoading, error } =
 		useChat({
 			api: "/api/chat",
-			body: { courseId },
+			body: { courseId, threadId },
 			initialMessages,
 			fetch: async (input, init) => {
 				const token = await getIdToken();
@@ -165,6 +294,9 @@ function ChatbotInner({
 				const headers = new Headers(init?.headers);
 				headers.set("Authorization", `Bearer ${token}`);
 				return fetch(input, { ...init, headers });
+			},
+			onFinish: () => {
+				void onConversationUpdated();
 			},
 			onError: (err) => toast.error(err.message || "Error en el chat"),
 		});
@@ -246,33 +378,87 @@ function ChatbotInner({
 		}
 	};
 
+	const activeTitle =
+		threads.find((t) => t.id === activeThreadId)?.title || "Conversación";
+
 	return (
 		<div className="grid h-[min(72vh,680px)] grid-cols-1 overflow-hidden rounded-xl border bg-card lg:grid-cols-[260px_1fr]">
-			{/* Sidebar fija */}
 			<aside className="flex min-h-0 flex-col border-b lg:border-b-0 lg:border-r">
-				<div className="shrink-0 border-b px-3 py-2.5">
-					<h3 className="text-sm font-semibold">Material</h3>
+				<div className="flex shrink-0 items-center justify-between gap-2 border-b px-3 py-2.5">
+					<h3 className="text-sm font-semibold">Conversaciones</h3>
+					<Button
+						type="button"
+						size="sm"
+						variant="outline"
+						className="h-7 px-2"
+						onClick={() => void onNewConversation()}
+						title="Nueva conversación"
+					>
+						<MessageSquarePlus className="h-3.5 w-3.5" />
+						Nueva
+					</Button>
 				</div>
-				<div className="min-h-0 flex-1 overflow-y-auto px-3 py-2">
-					{materials.length === 0 ? (
-						<p className="text-xs text-muted-foreground">
-							Sin material indexado todavía.
-						</p>
-					) : (
-						<ul className="space-y-2">
-							{materials.map((m) => (
-								<li key={m.id} className="flex gap-2 text-sm">
-									<FileText className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" />
-									<div className="min-w-0">
-										<div className="truncate font-medium">{m.title}</div>
-										<div className="truncate text-xs text-muted-foreground">
-											{m.topicTitle} · {m.status}
+
+				<div className="min-h-0 flex-1 overflow-y-auto px-2 py-2 space-y-4">
+					<ul className="space-y-1">
+						{threads.map((t) => {
+							const active = t.id === activeThreadId;
+							return (
+								<li key={t.id} className="group relative">
+									<button
+										type="button"
+										onClick={() => void onSelectThread(t.id)}
+										className={`w-full rounded-md px-2 py-2 pr-8 text-left text-xs transition-colors ${
+											active
+												? "bg-muted font-medium"
+												: "hover:bg-muted/60 text-muted-foreground"
+										}`}
+									>
+										<div className="line-clamp-2">{t.title}</div>
+										<div className="mt-0.5 text-[10px] opacity-70">
+											{new Date(t.updatedAt).toLocaleString()}
 										</div>
-									</div>
+									</button>
+									<button
+										type="button"
+										className="absolute right-1 top-2 rounded p-1 opacity-0 hover:bg-background group-hover:opacity-100"
+										title="Eliminar conversación"
+										onClick={(e) => {
+											e.stopPropagation();
+											void onDeleteThread(t.id);
+										}}
+									>
+										<Trash2 className="h-3 w-3 text-muted-foreground" />
+									</button>
 								</li>
-							))}
-						</ul>
-					)}
+							);
+						})}
+					</ul>
+
+					<div className="border-t pt-3 px-1">
+						<p className="mb-2 text-xs font-medium text-muted-foreground uppercase tracking-wide">
+							Material
+						</p>
+						{materials.length === 0 ? (
+							<p className="text-xs text-muted-foreground">
+								Sin material indexado todavía.
+							</p>
+						) : (
+							<ul className="space-y-2">
+								{materials.map((m) => (
+									<li key={m.id} className="flex gap-2 text-sm">
+										<FileText className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" />
+										<div className="min-w-0">
+											<div className="truncate font-medium text-xs">{m.title}</div>
+											<div className="truncate text-[10px] text-muted-foreground">
+												{m.topicTitle} · {m.status}
+											</div>
+										</div>
+									</li>
+								))}
+							</ul>
+						)}
+					</div>
 				</div>
 
 				{isTeacher && (
@@ -291,9 +477,7 @@ function ChatbotInner({
 								))}
 							</select>
 						) : (
-							<p className="text-xs text-amber-600">
-								Creá un tema en Material.
-							</p>
+							<p className="text-xs text-amber-600">Creá un tema en Material.</p>
 						)}
 						<label className="block">
 							<input
@@ -358,17 +542,20 @@ function ChatbotInner({
 				)}
 			</aside>
 
-			{/* Chat: ventana fija + scroll interno */}
 			<section className="flex min-h-0 min-w-0 flex-col">
 				<div className="shrink-0 border-b px-4 py-2.5">
-					<h3 className="text-sm font-semibold">Tutor</h3>
+					<h3 className="text-sm font-semibold truncate">{activeTitle}</h3>
+					<p className="text-[11px] text-muted-foreground">
+						Cada conversación tiene su propio historial. “Nueva” empieza en
+						blanco.
+					</p>
 				</div>
 
 				<div className="min-h-0 flex-1 overflow-y-auto px-4 py-3">
 					<div className="space-y-3">
 						{messages.length === 0 && (
 							<p className="py-10 text-center text-sm text-muted-foreground">
-								Preguntá sobre el material del curso. El historial se guarda.
+								Conversación nueva. Preguntá sobre el material del curso.
 							</p>
 						)}
 						{messages.map((m) => (

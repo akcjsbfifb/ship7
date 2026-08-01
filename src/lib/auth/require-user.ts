@@ -1,4 +1,4 @@
-import type { Role, User } from '@prisma/client';
+import type { User } from '@prisma/client';
 import type { DecodedIdToken } from 'firebase-admin/auth';
 
 import { AuthError } from '@/lib/auth/errors';
@@ -12,19 +12,12 @@ export function getBearerToken(req: Request): string | null {
   return token || null;
 }
 
-export type RequireUserOptions = {
-  roleOnCreate?: Role;
-};
-
 export type RequireUserResult = {
   user: User;
   decodedToken: DecodedIdToken;
 };
 
-export async function requireUser(
-  req: Request,
-  options?: RequireUserOptions,
-): Promise<RequireUserResult> {
+export async function requireUser(req: Request): Promise<RequireUserResult> {
   const token = getBearerToken(req);
   if (!token) {
     throw new AuthError('Missing or invalid Authorization header', 401);
@@ -61,7 +54,6 @@ export async function requireUser(
           firebaseUid: decodedToken.uid,
           email,
           name,
-          role: options?.roleOnCreate ?? 'STUDENT',
         },
       });
 

@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server';
 
-import { AuthError } from '@/lib/auth/errors';
 import { generateInviteCode } from '@/lib/auth/invite-code';
 import { handleError } from '@/lib/auth/http';
 import { requireUser } from '@/lib/auth/require-user';
@@ -9,10 +8,6 @@ import { prisma } from '@/lib/db/client';
 export async function POST(req: Request) {
   try {
     const { user } = await requireUser(req);
-
-    if (user.role !== 'TEACHER') {
-      throw new AuthError('Teacher access required', 403);
-    }
 
     const body = await req.json();
     const title = typeof body.title === 'string' ? body.title.trim() : '';

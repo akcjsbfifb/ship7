@@ -162,46 +162,70 @@ export class VectorDB {
   }
 
   /**
+   * Merge tiny fragments so vector search gets meaningful passages
+   * (PDFs via markitdown often produce hundreds of 1-line "paragraphs").
+   */
+  private mergeSmallChunks(chunks: string[], minChars = 280): string[] {
+    const merged: string[] = [];
+    let buf = '';
+    for (const raw of chunks) {
+      const c = raw.trim();
+      if (!c) continue;
+      buf = buf ? `${buf}\n\n${c}` : c;
+      if (buf.length >= minChars) {
+        merged.push(buf);
+        buf = '';
+      }
+    }
+    if (buf.trim()) merged.push(buf.trim());
+    return merged;
+  }
+
+  /**
    * Utility function to chunk text
    */
   chunkText(
     text: string,
     method = this.config.chunking.defaultMethod
   ): string[] {
+    let chunks: string[] = [];
     switch (method) {
       case 'sentence':
-        return text
+        chunks = text
           .trim()
           .split('.')
           .filter(Boolean)
           .map((s) => s.trim());
+        break;
       case 'paragraph':
-        return text
+        chunks = text
           .trim()
-          .split('\n\n')
+          .split(/\n{2,}/)
           .filter(Boolean)
           .map((p) => p.trim());
+        break;
       case 'fixed': {
-        const chunks: string[] = [];
-        const words = text.split(' ');
+        const words = text.split(/\s+/).filter(Boolean);
         let currentChunk = '';
 
         for (const word of words) {
           if (
-            currentChunk.length + word.length >
+            currentChunk.length + word.length + 1 >
             this.config.chunking.fixedSize
           ) {
-            chunks.push(currentChunk.trim());
+            if (currentChunk.trim()) chunks.push(currentChunk.trim());
             currentChunk = word;
           } else {
-            currentChunk += ' ' + word;
+            currentChunk = currentChunk ? `${currentChunk} ${word}` : word;
           }
         }
-        if (currentChunk) chunks.push(currentChunk.trim());
-        return chunks;
+        if (currentChunk.trim()) chunks.push(currentChunk.trim());
+        break;
       }
+      default:
+        return [];
     }
-    return [];
+    return this.mergeSmallChunks(chunks);
   }
 
   /**

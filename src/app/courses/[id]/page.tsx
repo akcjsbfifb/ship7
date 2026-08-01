@@ -4,6 +4,7 @@ import { useAuth } from "@/components/auth/auth-provider";
 import { ClassroomPanel } from "@/components/course/classroom-panel";
 import { ChatbotPanel } from "@/components/course/chatbot-panel";
 import { StudentsPanel } from "@/components/course/students-panel";
+import { TutorConfigPanel } from "@/components/course/tutor-config-panel";
 import { Navbar } from "@/components/navbar";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -24,7 +25,7 @@ type Course = {
 };
 
 type MeResponse = {
-	user: { id: string; role: "TEACHER" | "STUDENT" };
+	user: { id: string };
 	owned: Course[];
 	enrolled: Course[];
 };
@@ -144,6 +145,9 @@ export default function CoursePage() {
 						{course.description && (
 							<p className="text-muted-foreground mt-1">{course.description}</p>
 						)}
+						<p className="text-xs text-muted-foreground mt-2">
+							{isTeacher ? "Tu rol en este curso: profesor" : "Tu rol en este curso: alumno"}
+						</p>
 					</div>
 					{isTeacher && (
 						<Card className="p-4 space-y-2 min-w-[240px]">
@@ -172,13 +176,16 @@ export default function CoursePage() {
 
 				<Tabs defaultValue={defaultTab} className="space-y-4">
 					<TabsList
-						className={`grid w-full p-1 ${isTeacher ? "grid-cols-3" : "grid-cols-2"}`}
+						className={`grid w-full p-1 ${isTeacher ? "grid-cols-4" : "grid-cols-2"}`}
 					>
 						{isTeacher && (
 							<TabsTrigger value="students">Alumnos</TabsTrigger>
 						)}
 						<TabsTrigger value="material">Material</TabsTrigger>
 						<TabsTrigger value="chat">Chatbot</TabsTrigger>
+						{isTeacher && (
+							<TabsTrigger value="agent">Agente</TabsTrigger>
+						)}
 					</TabsList>
 
 					{isTeacher && (
@@ -192,6 +199,11 @@ export default function CoursePage() {
 					<TabsContent value="chat" className="mt-0">
 						<ChatbotPanel courseId={course.id} isTeacher={isTeacher} />
 					</TabsContent>
+					{isTeacher && (
+						<TabsContent value="agent" className="mt-0">
+							<TutorConfigPanel courseId={course.id} />
+						</TabsContent>
+					)}
 				</Tabs>
 			</main>
 		</div>

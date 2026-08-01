@@ -1,6 +1,6 @@
 "use client";
 
-import { useAuth, type AppRole } from "@/components/auth/auth-provider";
+import { useAuth } from "@/components/auth/auth-provider";
 import { Navbar } from "@/components/navbar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -16,7 +16,6 @@ export default function RegisterPage() {
 	const [email, setEmail] = useState("");
 	const [password, setPassword] = useState("");
 	const [name, setName] = useState("");
-	const [role, setRole] = useState<AppRole>("STUDENT");
 	const [submitting, setSubmitting] = useState(false);
 
 	useEffect(() => {
@@ -29,7 +28,7 @@ export default function RegisterPage() {
 		e.preventDefault();
 		setSubmitting(true);
 		try {
-			await register({ email, password, name, role });
+			await register({ email, password, name });
 			toast.success("Cuenta creada");
 			router.push("/dashboard");
 		} catch (err) {
@@ -42,7 +41,7 @@ export default function RegisterPage() {
 	const handleGoogle = async () => {
 		setSubmitting(true);
 		try {
-			await loginWithGoogle({ role });
+			await loginWithGoogle();
 			toast.success("Listo");
 			router.push("/dashboard");
 		} catch (err) {
@@ -82,25 +81,6 @@ export default function RegisterPage() {
 								minLength={6}
 								required
 							/>
-							<div className="space-y-2">
-								<p className="text-sm text-muted-foreground">I am a…</p>
-								<div className="grid grid-cols-2 gap-2">
-									<Button
-										type="button"
-										variant={role === "STUDENT" ? "default" : "outline"}
-										onClick={() => setRole("STUDENT")}
-									>
-										Student
-									</Button>
-									<Button
-										type="button"
-										variant={role === "TEACHER" ? "default" : "outline"}
-										onClick={() => setRole("TEACHER")}
-									>
-										Teacher
-									</Button>
-								</div>
-							</div>
 							<Button type="submit" className="w-full" disabled={submitting}>
 								{submitting ? "Creating…" : "Register"}
 							</Button>
@@ -122,10 +102,6 @@ export default function RegisterPage() {
 						>
 							Continue with Google
 						</Button>
-						<p className="text-xs text-muted-foreground text-center">
-							Google uses the role selected above (Teacher / Student) on first
-							sign-in only.
-						</p>
 						<p className="text-sm text-muted-foreground text-center">
 							Already have an account?{" "}
 							<Link href="/login" className="text-primary underline-offset-4 hover:underline">

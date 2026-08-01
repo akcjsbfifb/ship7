@@ -25,14 +25,54 @@ type MeResponse = {
 		id: string;
 		email: string;
 		name: string | null;
-		role: "TEACHER" | "STUDENT";
 	};
 	owned: Course[];
 	enrolled: Course[];
 };
 
+function CourseList({
+	courses,
+	empty,
+	kind,
+}: {
+	courses: Course[];
+	empty: string;
+	kind: "owned" | "enrolled";
+}) {
+	if (courses.length === 0) {
+		return <p className="text-muted-foreground text-sm">{empty}</p>;
+	}
+
+	return (
+		<div className="grid gap-3">
+			{courses.map((course) => (
+				<Link key={course.id} href={`/courses/${course.id}`}>
+					<Card className="hover:border-primary/50 transition-colors">
+						<CardContent className="py-4 flex items-center justify-between gap-4">
+							<div>
+								<div className="font-medium">{course.title}</div>
+								<div className="text-sm text-muted-foreground">
+									{kind === "owned"
+										? "Sos el profesor · Material + Tutor"
+										: "Inscripto como alumno · Tutor"}
+									{course.description ? ` · ${course.description}` : ""}
+								</div>
+							</div>
+							{kind === "owned" && (
+								<code className="text-xs bg-muted px-2 py-1 rounded shrink-0">
+									{course.inviteCode}
+								</code>
+							)}
+						</CardContent>
+					</Card>
+				</Link>
+			))}
+		</div>
+	);
+}
+
 export default function DashboardPage() {
-	const { firebaseUser, loading, syncProfile } = useAuth();
+	const { firebaseUser, loading } = useAuth();
 	const router = useRouter();
 	const [me, setMe] = useState<MeResponse | null>(null);
 	const [error, setError] = useState<string | null>(null);
@@ -64,19 +104,6 @@ export default function DashboardPage() {
 		}
 		void load();
 	}, [firebaseUser, loading, load, router]);
-
-	const becomeTeacher = async () => {
-		setBusy(true);
-		try {
-			await syncProfile({ role: "TEACHER" });
-			toast.success("Ahora sos profesor");
-			await load();
-		} catch (err) {
-			toast.error(err instanceof Error ? err.message : "No se pudo cambiar el rol");
-		} finally {
-			setBusy(false);
-		}
-	};
 
 	const createCourse = async (e: React.FormEvent) => {
 		e.preventDefault();
@@ -150,12 +177,6 @@ export default function DashboardPage() {
 		);
 	}
 
-	const isTeacher = me.user.role === "TEACHER";
-	const courses = [
-		...me.owned.map((c) => ({ ...c, kind: "owned" as const })),
-		...me.enrolled.map((c) => ({ ...c, kind: "enrolled" as const })),
-	];
-
 	return (
 		<div className="min-h-screen flex flex-col">
 			<Navbar />
@@ -163,34 +184,19 @@ export default function DashboardPage() {
 				<div>
 					<h1 className="text-3xl font-bold tracking-tight font-mono">Cursos</h1>
 					<p className="text-muted-foreground mt-1">
-						{me.user.name || me.user.email} ·{" "}
-						{isTeacher ? "profesor" : "alumno"}
+						{me.user.name || me.user.email}
 					</p>
 				</div>
 
-				{!isTeacher && (
-					<Card>
-						<CardHeader>
-							<CardTitle>¿Querés crear cursos?</CardTitle>
-						</CardHeader>
-						<CardContent className="space-y-3">
-							<p className="text-sm text-muted-foreground">
-								Tu cuenta está como alumno. Podés pasarte a profesor para crear
-								cursos y cargar material al RAG.
-							</p>
-							<Button onClick={becomeTeacher} disabled={busy}>
-								Convertirme en profesor
-							</Button>
-						</CardContent>
-					</Card>
-				)}
-
-				{isTeacher && (
+				<div className="grid gap-4 sm:grid-cols-2">
 					<Card>
 						<CardHeader>
 							<CardTitle>Crear curso</CardTitle>
 						</CardHeader>
 						<CardContent>
+							<p className="text-sm text-muted-foreground mb-3">
+								Al crearlo sos automáticamente el profesor de ese curso.
+							</p>
 							<form onSubmit={createCourse} className="space-y-3">
 								<Input
 									placeholder="Título del curso"
@@ -209,66 +215,46 @@ export default function DashboardPage() {
 							</form>
 						</CardContent>
 					</Card>
-				)}
 
-				<Card>
-					<CardHeader>
-						<CardTitle>Unirse con código</CardTitle>
-					</CardHeader>
-					<CardContent>
-						<p className="text-sm text-muted-foreground mb-3">
-							Pedile el código de invitación al profesor.
-						</p>
-						<form onSubmit={joinCourse} className="flex flex-col sm:flex-row gap-2">
-							<Input
-								placeholder="Código de invitación"
-								value={inviteCode}
-								onChange={(e) => setInviteCode(e.target.value)}
-								required
-							/>
-							<Button type="submit" disabled={busy}>
-								Unirme
-							</Button>
-						</form>
-					</CardContent>
-				</Card>
+					<Card>
+						<CardHeader>
+							<CardTitle>Unirse con código</CardTitle>
+						</CardHeader>
+						<CardContent>
+							<p className="text-sm text-muted-foreground mb-3">
+								Pedile el código de invitación al profesor del curso.
+							</p>
+							<form onSubmit={joinCourse} className="flex flex-col gap-2">
+								<Input
+									placeholder="Código de invitación"
+									value={inviteCode}
+									onChange={(e) => setInviteCode(e.target.value)}
+									required
+								/>
+								<Button type="submit" disabled={busy}>
+									Unirme como alumno
+								</Button>
+							</form>
+						</CardContent>
+					</Card>
+				</div>
 
 				<section className="space-y-3">
-					<h2 className="text-xl font-semibold">Mis cursos</h2>
-					{courses.length === 0 ? (
-						<p className="text-muted-foreground text-sm">
-							{isTeacher
-								? "Todavía no tenés cursos. Creá uno arriba."
-								: "Todavía no estás en ningún curso. Unite con un código."}
-						</p>
-					) : (
-						<div className="grid gap-3">
-							{courses.map((course) => (
-								<Link key={`${course.kind}-${course.id}`} href={`/courses/${course.id}`}>
-									<Card className="hover:border-primary/50 transition-colors">
-										<CardContent className="py-4 flex items-center justify-between gap-4">
-											<div>
-												<div className="font-medium">{course.title}</div>
-												<div className="text-sm text-muted-foreground">
-													{course.kind === "owned"
-														? "Sos el profesor · Material + Tutor"
-														: "Inscripto · Tutor"}
-													{course.description
-														? ` · ${course.description}`
-														: ""}
-												</div>
-											</div>
-											{course.kind === "owned" && (
-												<code className="text-xs bg-muted px-2 py-1 rounded shrink-0">
-													{course.inviteCode}
-												</code>
-											)}
-										</CardContent>
-									</Card>
-								</Link>
-							))}
-						</div>
-					)}
+					<h2 className="text-xl font-semibold">Donde soy profesor</h2>
+					<CourseList
+						courses={me.owned}
+						kind="owned"
+						empty="Todavía no creaste cursos. Creá uno arriba."
+					/>
+				</section>
+
+				<section className="space-y-3">
+					<h2 className="text-xl font-semibold">Donde soy alumno</h2>
+					<CourseList
+						courses={me.enrolled}
+						kind="enrolled"
+						empty="Todavía no estás inscripto en ningún curso. Unite con un código."
+					/>
 				</section>
 			</main>
 		</div>
