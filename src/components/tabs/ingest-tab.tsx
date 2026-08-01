@@ -26,7 +26,7 @@ export function IngestTab() {
 		}
 
 		setLoading(true);
-		const toastId = toast.loading("Processing your text...");
+		const toastId = toast.loading("Embedding with OpenAI...");
 
 		try {
 			const response = await fetch("/api/ingest", {
@@ -39,13 +39,15 @@ export function IngestTab() {
 				}),
 			});
 
+			const data = await response.json();
 			if (!response.ok) {
-				throw new Error("Failed to ingest");
+				throw new Error(data.error || "Failed to ingest");
 			}
 
-			toast.success("Text successfully queued for embedding!", {
-				id: toastId,
-			});
+			toast.success(
+				`Stored ${data.chunks ?? "?"} chunks for course ${courseId.trim()}`,
+				{ id: toastId },
+			);
 			setText("");
 		} catch (error) {
 			console.error("Failed to process:", error);

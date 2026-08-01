@@ -8,13 +8,13 @@ export const env = createEnv({
       .enum(['development', 'test', 'preview', 'production'])
       .default('development'),
     POSTGRES_URL: z.string().url().optional(),
-    AI_GATEWAY_API_KEY: z.string().min(1).optional(),
+    OPENAI_API_KEY: z.string().min(1).optional(),
   },
   client: {},
   runtimeEnv: {
     NODE_ENV: process.env.NODE_ENV,
     POSTGRES_URL: process.env.POSTGRES_URL,
-    AI_GATEWAY_API_KEY: process.env.AI_GATEWAY_API_KEY,
+    OPENAI_API_KEY: process.env.OPENAI_API_KEY,
   },
   skipValidation: !!process.env.SKIP_ENV_VALIDATION,
 });

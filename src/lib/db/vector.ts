@@ -82,9 +82,10 @@ export class VectorDB {
             "${columns.courseId}",
             "${columns.content}",
             "${columns.vector}",
-            "${columns.metadata}"
+            "${columns.metadata}",
+            "${columns.updatedAt}"
           )
-          VALUES ($1, $2, $3::vector, $4)`,
+          VALUES ($1, $2, $3::vector, $4, NOW())`,
           [
             options.courseId,
             chunks[i],

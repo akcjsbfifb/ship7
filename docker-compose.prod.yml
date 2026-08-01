@@ -35,7 +35,7 @@ services:
       HOSTNAME: '0.0.0.0'
       PORT: '3000'
       SKIP_ENV_VALIDATION: '1'
-      AI_GATEWAY_API_KEY: ${AI_GATEWAY_API_KEY:-}
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
       POSTGRES_URL: postgresql://${POSTGRES_USER:-eduai}:${POSTGRES_PASSWORD:-eduai}@postgres:5432/${POSTGRES_DB:-eduai}?schema=public
       PGUSER: ${POSTGRES_USER:-eduai}
       PGPASSWORD: ${POSTGRES_PASSWORD:-eduai}
@@ -43,8 +43,6 @@ services:
       PGPORT: '5432'
       PGDATABASE: ${POSTGRES_DB:-eduai}
       PGSSL: 'false'
-      INNGEST_EVENT_KEY: ${INNGEST_EVENT_KEY:-}
-      INNGEST_SIGNING_KEY: ${INNGEST_SIGNING_KEY:-}
     ports:
       - '${PUERTO_FRONTEND:-3000}:3000'
     depends_on:

@@ -1,12 +1,15 @@
-import { inngest } from '@/inngest/client';
+import { documentsVectorDB } from '@/lib/db/vector';
+import { DB_CONFIG } from '@/lib/db/config';
 import { NextResponse } from 'next/server';
+
+export const maxDuration = 60;
 
 export async function POST(req: Request) {
   try {
     const {
       text,
       courseId = 'demo-course',
-      chunkingMethod = 'paragraph',
+      chunkingMethod = DB_CONFIG.chunking.defaultMethod,
       metadata = {},
     } = await req.json();
 
@@ -21,21 +24,21 @@ export async function POST(req: Request) {
       );
     }
 
-    await inngest.send({
-      name: 'embed/text-with-metadata',
-      data: {
-        text,
-        courseId,
-        chunkingMethod,
-        metadata,
-      },
+    const result = await documentsVectorDB.addText(text, {
+      courseId,
+      chunkingMethod,
+      metadata,
     });
 
-    return NextResponse.json({ success: true, courseId });
+    return NextResponse.json({
+      success: true,
+      courseId,
+      chunks: result.count,
+    });
   } catch (error) {
     console.error('Ingest error:', error);
     return NextResponse.json(
-      { error: 'Failed to queue embedding job' },
+      { error: 'Failed to embed and store text' },
       { status: 500 }
     );
   }

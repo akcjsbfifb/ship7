@@ -86,12 +86,8 @@ export default function DocsPage() {
 # Database
 POSTGRES_URL="postgres://..."
 
-# Vercel AI Gateway
-AI_GATEWAY_API_KEY="..."
-
-# Inngest (optional, for background jobs)
-INNGEST_EVENT_KEY="..."
-INNGEST_SIGNING_KEY="..."
+# OpenAI
+OPENAI_API_KEY="sk-..."
                     `}</CodeBlock>
 									</div>
 								</div>

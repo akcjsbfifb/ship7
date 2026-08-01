@@ -33,7 +33,7 @@ services:
     environment:
       NODE_ENV: development
       SKIP_ENV_VALIDATION: '1'
-      AI_GATEWAY_API_KEY: ${AI_GATEWAY_API_KEY:-}
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
       POSTGRES_URL: postgresql://${POSTGRES_USER:-eduai}:${POSTGRES_PASSWORD:-eduai}@postgres:5432/${POSTGRES_DB:-eduai}?schema=public
       PGUSER: ${POSTGRES_USER:-eduai}
       PGPASSWORD: ${POSTGRES_PASSWORD:-eduai}
@@ -41,7 +41,6 @@ services:
       PGPORT: '5432'
       PGDATABASE: ${POSTGRES_DB:-eduai}
       PGSSL: 'false'
-      INNGEST_DEV: '1'
     ports:
       - '${PUERTO_FRONTEND:-3000}:3000'
     volumes:
@@ -51,17 +50,6 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
-    networks:
-      - app-network
-
-  inngest:
-    image: inngest/inngest:latest
-    restart: unless-stopped
-    command: 'inngest dev -u http://app:3000/api/inngest --host 0.0.0.0'
-    ports:
-      - '${PUERTO_INNGEST:-8288}:8288'
-    depends_on:
-      - app
     networks:
       - app-network
 

@@ -1,6 +1,6 @@
 export const DB_CONFIG = {
   embedding: {
-    model: 'openai/text-embedding-3-small',
+    model: 'text-embedding-3-small',
     dimensions: 1536,
     distance: 'cosine' as 'cosine' | 'euclidean' | 'inner_product',
   },

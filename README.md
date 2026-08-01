@@ -9,8 +9,7 @@ forked from **NextRag**; Docker layout aligned with **lambda/boilerplate**
 - **Next.js 15** (App Router, `output: "standalone"`)
 - **PostgreSQL 16 + pgvector** (course-isolated `documents`)
 - **Prisma** + **node-pg** for similarity queries
-- **Vercel AI Gateway** (`openai/gpt-4o-mini`, `openai/text-embedding-3-small`)
-- **Inngest** (dev sidecar in compose)
+- **OpenAI** (`gpt-4o-mini`, `text-embedding-3-small`) via AI SDK
 - **Tailwind + shadcn/ui**
 - **pnpm**
 
@@ -18,7 +17,7 @@ forked from **NextRag**; Docker layout aligned with **lambda/boilerplate**
 
 ```bash
 cp .env.example .env
-# set AI_GATEWAY_API_KEY in .env (Vercel → AI Gateway → API Keys)
+# set OPENAI_API_KEY in .env
 
 docker compose up -d --build
 ```
@@ -27,10 +26,9 @@ docker compose up -d --build
 |------------|-----------------------------|
 | App        | http://localhost:3000       |
 | Playground | http://localhost:3000/chat  |
-| Inngest    | http://localhost:8288       |
 | Postgres   | localhost:5432              |
 
-Ports: `PUERTO_FRONTEND`, `PUERTO_POSTGRES`, `PUERTO_INNGEST` in `.env`.
+Ports: `PUERTO_FRONTEND`, `PUERTO_POSTGRES` in `.env`.
 
 ### Production
 
