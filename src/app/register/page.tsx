@@ -57,7 +57,7 @@ export default function RegisterPage() {
 		<div className="min-h-screen flex flex-col">
 			<Navbar />
 			<main className="flex-1 flex items-center justify-center px-4 py-12">
-				<Card className="w-full max-w-md border-brand shadow-none">
+				<Card className="w-full max-w-md border-brand/70 shadow-none dark:border-brand/35">
 					<CardHeader>
 						<CardTitle className="text-2xl">Crear cuenta</CardTitle>
 						<p className="text-sm text-muted-foreground">

@@ -29,7 +29,7 @@ export default function Home() {
 				<section className="relative mx-auto grid max-w-6xl items-center gap-12 px-4 pb-20 pt-14 md:grid-cols-[1.15fr_0.85fr] md:pb-28 md:pt-20">
 					<div className="space-y-6">
 						<p className="font-mono text-xs tracking-wide text-warm">
-							EducAI · Rosario
+							Bookworm · Rosario
 						</p>
 						<h1 className="text-balance text-4xl font-semibold tracking-tight md:text-5xl">
 							Un tutor IA que responde solo con la bibliografía de tu cátedra
