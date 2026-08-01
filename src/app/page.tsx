@@ -3,8 +3,6 @@ import { TechIcons } from "@/components/tech-icons";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { DotPattern } from "@/components/ui/dot-pattern";
-import { env } from "@/lib/env.mjs";
-import { cn } from "@/lib/utils";
 import { Braces, Database, GitBranch, Terminal } from "lucide-react";
 import Link from "next/link";
 
@@ -18,9 +16,9 @@ export default function Home() {
 						EduAI
 					</h1>
 					<p className="text-muted-foreground max-w-[600px] mx-auto">
-						Hackathon prototype for interactive courses: RAG tutor for students,
-						teacher tools, attendance, and course-isolated knowledge bases on
-						Next.js + PostgreSQL/pgvector.
+						Interactive courses with a course-scoped RAG tutor. Teachers ingest
+						material; students join with an invite code and chat within their
+						course knowledge base.
 					</p>
 				</div>
 
@@ -39,7 +37,7 @@ export default function Home() {
 									<GitBranch className="h-4 w-4" /> Course-scoped RAG
 								</li>
 								<li className="flex items-center gap-2">
-									<Braces className="h-4 w-4" /> Next.js 15
+									<Braces className="h-4 w-4" /> Firebase Auth
 								</li>
 							</ul>
 							<div className="flex-1" />
@@ -53,22 +51,23 @@ export default function Home() {
 						<div className="flex flex-col gap-4 h-full">
 							<div className="font-mono text-sm">
 								<div className="text-muted-foreground">
-									&#47;&#47; Try it out
+									&#47;&#47; Get started
 								</div>
-								<code className="text-primary">RAG Playground</code>
+								<code className="text-primary">Courses &amp; Tutor</code>
 							</div>
+							<p className="text-sm text-muted-foreground">
+								Sign in as a teacher to create courses, or as a student to join
+								with an invite code.
+							</p>
 							<div className="flex-1" />
-							<Button variant="default" className="w-full" asChild>
-								<Link
-									href={env.NODE_ENV === "production" ? "" : "/chat"}
-									className={cn(
-										env.NODE_ENV === "production" && "disabled:opacity-50",
-									)}
-									title="Only available in local environment"
-								>
-									Open Playground →
-								</Link>
-							</Button>
+							<div className="flex flex-col gap-2">
+								<Button variant="default" className="w-full" asChild>
+									<Link href="/login">Log in →</Link>
+								</Button>
+								<Button variant="outline" className="w-full" asChild>
+									<Link href="/register">Create account</Link>
+								</Button>
+							</div>
 						</div>
 					</Card>
 				</div>

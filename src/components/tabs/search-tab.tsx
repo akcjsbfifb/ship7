@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { authFetch } from "@/lib/auth/client-api";
 import { useState } from "react";
 import { toast } from "sonner";
 
@@ -13,11 +14,12 @@ type SearchResult = {
 	courseId?: string;
 };
 
-const DEFAULT_COURSE_ID = "demo-course";
+type SearchTabProps = {
+	courseId: string;
+};
 
-export function SearchTab() {
+export function SearchTab({ courseId }: SearchTabProps) {
 	const [query, setQuery] = useState("");
-	const [courseId, setCourseId] = useState(DEFAULT_COURSE_ID);
 	const [loading, setLoading] = useState(false);
 	const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
 
@@ -30,17 +32,21 @@ export function SearchTab() {
 
 		setLoading(true);
 		try {
-			const response = await fetch("/api/search", {
+			const response = await authFetch("/api/search", {
 				method: "POST",
-				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify({ query, courseId: courseId.trim() }),
+				body: JSON.stringify({ query, courseId }),
 			});
 
-			const { results } = await response.json();
-			setSearchResults(results ?? []);
+			const data = await response.json();
+			if (!response.ok) {
+				throw new Error(data.error || "Failed to search");
+			}
+			setSearchResults(data.results ?? []);
 		} catch (error) {
 			console.error("Failed to search:", error);
-			toast.error("Failed to perform search. Please try again.");
+			toast.error(
+				error instanceof Error ? error.message : "Failed to perform search",
+			);
 		} finally {
 			setLoading(false);
 		}
@@ -53,12 +59,6 @@ export function SearchTab() {
 			</CardHeader>
 			<CardContent className="space-y-4">
 				<form onSubmit={handleSearch} className="flex flex-col gap-2 sm:flex-row">
-					<Input
-						value={courseId}
-						onChange={(e) => setCourseId(e.target.value)}
-						placeholder="courseId"
-						className="sm:max-w-[180px]"
-					/>
 					<Input
 						value={query}
 						onChange={(e) => setQuery(e.target.value)}

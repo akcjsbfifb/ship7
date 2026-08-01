@@ -2,6 +2,7 @@ import { GeistMono } from "geist/font/mono";
 import { GeistSans } from "geist/font/sans";
 import type { Metadata } from "next";
 import "./globals.css";
+import { AuthProvider } from "@/components/auth/auth-provider";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "sonner";
 
@@ -27,8 +28,10 @@ export default function RootLayout({
 					enableSystem
 					disableTransitionOnChange
 				>
-					<Toaster richColors position="top-center" />
-					{children}
+					<AuthProvider>
+						<Toaster richColors position="top-center" />
+						{children}
+					</AuthProvider>
 				</ThemeProvider>
 			</body>
 		</html>

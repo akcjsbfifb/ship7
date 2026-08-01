@@ -7,6 +7,46 @@ datasource db {
   url      = env("POSTGRES_URL")
 }
 
+enum Role {
+  TEACHER
+  STUDENT
+}
+
+model User {
+  id           String       @id @default(cuid())
+  firebaseUid  String       @unique
+  email        String       @unique
+  name         String?
+  role         Role         @default(STUDENT)
+  createdAt    DateTime     @default(now())
+  coursesOwned Course[]     @relation("CourseTeacher")
+  enrollments  Enrollment[]
+}
+
+model Course {
+  id          String       @id @default(cuid())
+  title       String
+  description String?
+  inviteCode  String       @unique
+  teacherId   String
+  teacher     User         @relation("CourseTeacher", fields: [teacherId], references: [id])
+  enrollments Enrollment[]
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+}
+
+model Enrollment {
+  id        String   @id @default(cuid())
+  courseId  String
+  userId    String
+  course    Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([courseId, userId])
+  @@index([userId])
+}
+
 /// Chunks vectorizados aislados por curso (multi-tenancy via metadata filtering).
 model documents {
   id        BigInt                 @id @default(autoincrement())
