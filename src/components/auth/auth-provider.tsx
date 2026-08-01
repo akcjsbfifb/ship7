@@ -1,26 +1,26 @@
 "use client";
 
 import {
+	type User as FirebaseUser,
 	createUserWithEmailAndPassword,
 	onAuthStateChanged,
 	signInWithEmailAndPassword,
 	signInWithPopup,
 	signOut,
 	updateProfile,
-	type User as FirebaseUser,
 } from "firebase/auth";
 import {
+	type ReactNode,
 	createContext,
 	useCallback,
 	useContext,
 	useEffect,
 	useMemo,
 	useState,
-	type ReactNode,
 } from "react";
 
-import { auth, googleProvider } from "@/lib/firebase/client";
 import { toAuthError } from "@/lib/auth/firebase-errors";
+import { auth, googleProvider } from "@/lib/firebase/client";
 
 type AuthContextValue = {
 	firebaseUser: FirebaseUser | null;
@@ -34,7 +34,10 @@ type AuthContextValue = {
 	}) => Promise<void>;
 	loginWithGoogle: () => Promise<void>;
 	logout: () => Promise<void>;
-	syncProfile: (opts?: { name?: string }) => Promise<unknown>;
+	syncProfile: (opts?: {
+		name?: string;
+		role?: "TEACHER" | "STUDENT";
+	}) => Promise<unknown>;
 };
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -56,7 +59,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 	}, []);
 
 	const syncProfile = useCallback(
-		async (opts?: { name?: string }) => {
+		async (opts?: { name?: string; role?: "TEACHER" | "STUDENT" }) => {
 			try {
 				const token = await getIdToken();
 				if (!token) throw new Error("Not authenticated");
@@ -105,7 +108,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 			name?: string;
 		}) => {
 			try {
-				const cred = await createUserWithEmailAndPassword(auth, email, password);
+				const cred = await createUserWithEmailAndPassword(
+					auth,
+					email,
+					password,
+				);
 				if (name?.trim()) {
 					await updateProfile(cred.user, { displayName: name.trim() });
 				}

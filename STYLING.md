@@ -1,4 +1,4 @@
-# Especificación de Diseño UI/UX y Sistema de Estilos — EducAI
+# Especificación de Diseño UI/UX y Sistema de Estilos — Bookworm
 
 Este archivo actúa como un *contexto estructurado de alta precisión* diseñado para ser inyectado directamente en una IA de desarrollo frontend (como Claude, GPT-4o, o v0.dev). Transforma los requerimientos iniciales en tokens de diseño claros, una arquitectura de componentes detallada y directrices estrictas de comportamiento visual.
 
@@ -37,7 +37,7 @@ El sistema se compone de tres layouts principales conectados fluidamente:
 ### Vista 0: Pantalla de Autenticación (Login / Signup)
 * *Diseño de Pantalla Completa:* Un contenedor centrado (flex items-center justify-center min-h-screen) sobre el fondo principal.
 * *Card de Autenticación:* Un contenedor minimalista (max-w-md w-full p-8 bg-gray-50 dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 rounded-xl).
-* *Sección de Branding:* Logotipo e isotipo de EducAI en alta fidelidad tipográfica, acompañados de una breve descripción en texto secundario.
+* *Sección de Branding:* Logotipo e isotipo de Bookworm en alta fidelidad tipográfica, acompañados de una breve descripción en texto secundario.
 * *Formulario Tradicional (Email & Password):* 
   * Inputs limpios y minimalistas para el correo electrónico y la contraseña con placeholders sutiles.
   * Los campos deben usar bordes estándar que reaccionan con el color de acento (focus:border-lime-500 o focus:border-lime-700) únicamente al entrar en estado de foco.
@@ -72,7 +72,7 @@ Al seleccionar un tema específico, la interfaz se divide verticalmente en dos �
 Copia íntegramente el siguiente recuadro y provéelo a tu IA de frontend para iniciar la generación del código:
 
 ```text
-Act as an expert frontend developer specialized in Tailwind CSS, React, and clean UI/UX design. Build the user interface for "EducAI", a minimalist educational web application based on the following structural and design specifications:
+Act as an expert frontend developer specialized in Tailwind CSS, React, and clean UI/UX design. Build the user interface for "Bookworm", a minimalist educational web application based on the following structural and design specifications:
 
 1. GLOBAL STYLING & PALETTE (Strict Monochromatic + Muted Green Accents):
    - Light Mode: Background white (#FFFFFF), surfaces gray-50 (#F9FAFB), text gray-900 (#111827), borders gray-200 (#E5E7EB). Accent: Lime Green (#84CC16) ONLY for subtle interactive borders or active indicator dots.

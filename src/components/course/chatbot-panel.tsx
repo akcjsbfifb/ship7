@@ -162,7 +162,11 @@ export function ChatbotPanel({
 	const newConversation = async () => {
 		try {
 			const created = await createThread();
-			setThreads((prev) => [created, ...prev]);
+			// The API may return an existing empty thread; avoid listing it twice.
+			setThreads((prev) => [
+				created,
+				...prev.filter((t) => t.id !== created.id),
+			]);
 			setInitialMessages([]);
 			setActiveThreadId(created.id);
 		} catch (err) {
@@ -349,7 +353,9 @@ function ChatbotInner({
 			}
 			await reloadMaterials();
 		} catch (err) {
-			toast.error(err instanceof Error ? err.message : "Error", { id: toastId });
+			toast.error(err instanceof Error ? err.message : "Error", {
+				id: toastId,
+			});
 		} finally {
 			setBusy(false);
 		}
@@ -380,7 +386,9 @@ function ChatbotInner({
 			setPasteOpen(false);
 			await reloadMaterials();
 		} catch (err) {
-			toast.error(err instanceof Error ? err.message : "Error", { id: toastId });
+			toast.error(err instanceof Error ? err.message : "Error", {
+				id: toastId,
+			});
 		} finally {
 			setBusy(false);
 		}

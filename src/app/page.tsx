@@ -29,7 +29,7 @@ export default function Home() {
 				<section className="relative mx-auto grid max-w-6xl items-center gap-12 px-4 pb-20 pt-14 md:grid-cols-[1.15fr_0.85fr] md:pb-28 md:pt-20">
 					<div className="space-y-6">
 						<p className="font-mono text-xs tracking-wide text-warm">
-							EducAI · Rosario
+							Bookworm · Rosario
 						</p>
 						<h1 className="text-balance text-4xl font-semibold tracking-tight md:text-5xl">
 							Un tutor IA que responde solo con la bibliografía de tu cátedra
@@ -104,10 +104,7 @@ export default function Home() {
 									key={problem.title}
 									className="cut flex gap-5 border border-border bg-background/60 p-5"
 								>
-									<span
-										className="font-mono text-sm text-warm"
-										aria-hidden
-									>
+									<span className="font-mono text-sm text-warm" aria-hidden>
 										{String(i + 1).padStart(2, "0")}
 									</span>
 									<div>
@@ -211,25 +208,27 @@ export default function Home() {
 
 				{/* CTA final */}
 				<section className="border-t border-border bg-card/70">
-					<div className="mx-auto flex max-w-6xl flex-col items-start gap-6 px-4 py-16 md:flex-row md:items-center md:justify-between md:py-20">
+					<div className="mx-auto max-w-6xl px-4 py-16 md:py-20">
 						<div className="cut-brackets relative p-1.5">
-							<div className="cut-lg border border-brand/25 bg-cream/50 p-6 md:p-8">
-								<h2 className="text-2xl font-semibold tracking-tight md:text-3xl">
-									Creá tu primer curso hoy
-								</h2>
-								<p className="mt-2 max-w-md text-muted-foreground">
-									Subí el material que ya tenés y compartí el código con tus
-									alumnos.
-								</p>
+							<div className="cut-lg flex flex-col items-start gap-6 border border-brand/25 bg-cream/50 p-6 md:flex-row md:items-center md:justify-between md:p-10">
+								<div>
+									<h2 className="text-2xl font-semibold tracking-tight md:text-3xl">
+										Creá tu primer curso hoy
+									</h2>
+									<p className="mt-2 max-w-md text-muted-foreground">
+										Subí el material que ya tenés y compartí el código con tus
+										alumnos.
+									</p>
+								</div>
+								<Button
+									asChild
+									size="lg"
+									className="cut-sm shrink-0 bg-brand text-brand-foreground hover:bg-brand/90"
+								>
+									<Link href="/register">Crear cuenta</Link>
+								</Button>
 							</div>
 						</div>
-						<Button
-							asChild
-							size="lg"
-							className="cut-sm bg-brand text-brand-foreground hover:bg-brand/90"
-						>
-							<Link href="/register">Crear cuenta</Link>
-						</Button>
 					</div>
 				</section>
 			</main>

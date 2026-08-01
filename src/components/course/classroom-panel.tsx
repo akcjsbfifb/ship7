@@ -46,7 +46,9 @@ export function ClassroomPanel({
 	const [openIds, setOpenIds] = useState<Record<string, boolean>>({});
 	const [newTitle, setNewTitle] = useState("");
 	const [busy, setBusy] = useState(false);
-	const [reorderingTopicId, setReorderingTopicId] = useState<string | null>(null);
+	const [reorderingTopicId, setReorderingTopicId] = useState<string | null>(
+		null,
+	);
 	const [pasteTopicId, setPasteTopicId] = useState<string | null>(null);
 	const [pasteText, setPasteText] = useState("");
 
@@ -64,7 +66,9 @@ export function ClassroomPanel({
 				return next;
 			});
 		} catch (err) {
-			toast.error(err instanceof Error ? err.message : "No se pudo cargar material");
+			toast.error(
+				err instanceof Error ? err.message : "No se pudo cargar material",
+			);
 		}
 	}, [courseId]);
 
@@ -154,7 +158,9 @@ export function ClassroomPanel({
 			setPasteTopicId(null);
 			await load();
 		} catch (err) {
-			toast.error(err instanceof Error ? err.message : "Error", { id: toastId });
+			toast.error(err instanceof Error ? err.message : "Error", {
+				id: toastId,
+			});
 		} finally {
 			setBusy(false);
 		}
@@ -246,9 +252,12 @@ export function ClassroomPanel({
 		if (!confirm("¿Borrar el tema y todos sus archivos?")) return;
 		setBusy(true);
 		try {
-			const res = await authFetch(`/api/courses/${courseId}/topics/${topicId}`, {
-				method: "DELETE",
-			});
+			const res = await authFetch(
+				`/api/courses/${courseId}/topics/${topicId}`,
+				{
+					method: "DELETE",
+				},
+			);
 			const data = await res.json();
 			if (!res.ok) throw new Error(data.error || "Error");
 			toast.success("Tema eliminado");
@@ -305,9 +314,7 @@ export function ClassroomPanel({
 							<button
 								type="button"
 								className="flex w-full items-center gap-2 p-4 text-left hover:bg-muted/40"
-								onClick={() =>
-									setOpenIds((s) => ({ ...s, [topic.id]: !open }))
-								}
+								onClick={() => setOpenIds((s) => ({ ...s, [topic.id]: !open }))}
 							>
 								{open ? (
 									<ChevronDown className="h-4 w-4 shrink-0" />
@@ -338,20 +345,20 @@ export function ClassroomPanel({
 																type="button"
 																size="icon"
 																variant="ghost"
-																className="size-7"
+																className="size-5 [&_svg]:size-3"
 																disabled={topicBusy || index === 0}
 																aria-label="Subir archivo"
 																onClick={() =>
 																	void moveMaterial(topic.id, m.id, "up")
 																}
 															>
-																<ArrowUp className="h-3.5 w-3.5" />
+																<ArrowUp />
 															</Button>
 															<Button
 																type="button"
 																size="icon"
 																variant="ghost"
-																className="size-7"
+																className="size-5 [&_svg]:size-3"
 																disabled={
 																	topicBusy ||
 																	index === topic.materials.length - 1
@@ -361,7 +368,7 @@ export function ClassroomPanel({
 																	void moveMaterial(topic.id, m.id, "down")
 																}
 															>
-																<ArrowDown className="h-3.5 w-3.5" />
+																<ArrowDown />
 															</Button>
 														</div>
 													)}
@@ -376,7 +383,9 @@ export function ClassroomPanel({
 																{m.title}
 															</button>
 														) : (
-															<div className="truncate font-medium">{m.title}</div>
+															<div className="truncate font-medium">
+																{m.title}
+															</div>
 														)}
 														<div className="text-xs text-muted-foreground">
 															{m.filename} · {m.status}
