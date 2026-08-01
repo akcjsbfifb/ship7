@@ -22,9 +22,9 @@
 		--destructive-foreground: 0 0% 98%;
 		--border: 0 0% 90%;
 		--input: 0 0% 90%;
-		--ring: 128 55% 52%;
-		--brand: 128 55% 52%;
-		--brand-foreground: 128 40% 14%;
+		--ring: 86 69% 23%;
+		--brand: 86 69% 23%;
+		--brand-foreground: 80 40% 97%;
 		--radius: 0.625rem;
 	}
 
@@ -47,9 +47,9 @@
 		--destructive-foreground: 0 0% 98%;
 		--border: 0 0% 20%;
 		--input: 0 0% 22%;
-		--ring: 128 35% 45%;
-		--brand: 128 35% 45%;
-		--brand-foreground: 128 20% 96%;
+		--ring: 85 40% 55%;
+		--brand: 85 40% 55%;
+		--brand-foreground: 86 65% 10%;
 	}
 }
 

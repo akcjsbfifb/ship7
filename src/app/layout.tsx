@@ -7,9 +7,9 @@ import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "sonner";
 
 export const metadata: Metadata = {
-	title: "EducAI — Cursos con tutor IA",
+	title: "EducAI: un tutor IA anclado a la bibliografía de tu cátedra",
 	description:
-		"Plataforma educativa: cursos, material indexado y tutor RAG por clase",
+		"Creá cursos, subí el material y tus alumnos estudian con una IA que responde solo con las fuentes del curso, citando cada respuesta.",
 };
 
 export default function RootLayout({

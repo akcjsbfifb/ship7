@@ -1,8 +1,9 @@
 "use client";
 
-import { ThemeToggle } from "@/components/theme-toggle";
 import { useAuth } from "@/components/auth/auth-provider";
+import { ThemeToggle } from "@/components/theme-toggle";
 import { Button } from "@/components/ui/button";
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 
@@ -25,22 +26,13 @@ export function Navbar() {
 		<header className="w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50">
 			<div className="max-w-[1200px] mx-auto flex h-16 items-center justify-between px-4">
 				<Link href="/" className="flex items-center gap-2">
-					<span className="flex size-8 items-center justify-center rounded-lg border border-brand/40 bg-brand/10 text-brand">
-						<svg
-							xmlns="http://www.w3.org/2000/svg"
-							viewBox="0 0 24 24"
-							fill="none"
-							stroke="currentColor"
-							strokeWidth="2"
-							strokeLinecap="round"
-							strokeLinejoin="round"
-							className="size-4"
-							aria-hidden
-						>
-							<path d="M22 10v6M2 10l10-5 10 5-10 5z" />
-							<path d="M6 12v5c3 3 9 3 12 0v-5" />
-						</svg>
-					</span>
+					<Image
+						src="/logos/mortarboard.svg"
+						alt=""
+						width={28}
+						height={28}
+						aria-hidden
+					/>
 					<span className="font-semibold text-lg">EducAI</span>
 				</Link>
 				<div className="flex items-center gap-6">

@@ -6,7 +6,7 @@ import { toast } from "sonner";
 
 import { useAuth } from "@/components/auth/auth-provider";
 import { ThemeToggle } from "@/components/theme-toggle";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
@@ -29,6 +29,7 @@ export function CourseHeader({
 	const { firebaseUser, logout } = useAuth();
 	const displayName =
 		user?.name || firebaseUser?.displayName || user?.email || "Usuario";
+	const photoURL = firebaseUser?.photoURL ?? undefined;
 
 	const copyInvite = async () => {
 		await navigator.clipboard.writeText(course.inviteCode);
@@ -115,6 +116,9 @@ export function CourseHeader({
 
 				<button type="button" onClick={() => void logout()} title="Cerrar sesión">
 					<Avatar className="size-9">
+						{photoURL ? (
+							<AvatarImage src={photoURL} alt={displayName} referrerPolicy="no-referrer" />
+						) : null}
 						<AvatarFallback className="bg-secondary text-xs font-medium">
 							{initialsOf(displayName, user?.email)}
 						</AvatarFallback>

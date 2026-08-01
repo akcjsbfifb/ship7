@@ -5,7 +5,7 @@ import Link from "next/link";
 
 import { useAuth } from "@/components/auth/auth-provider";
 import { ThemeToggle } from "@/components/theme-toggle";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
 	DropdownMenu,
 	DropdownMenuContent,
@@ -21,6 +21,7 @@ export function DashboardHeader({ user }: { user?: MeUser | null }) {
 	const displayName =
 		user?.name || firebaseUser?.displayName || user?.email || "Usuario";
 	const email = user?.email || firebaseUser?.email || "";
+	const photoURL = firebaseUser?.photoURL ?? undefined;
 
 	return (
 		<header className="sticky top-0 z-20 border-b border-border bg-background/80 backdrop-blur-md">
@@ -51,6 +52,9 @@ export function DashboardHeader({ user }: { user?: MeUser | null }) {
 							aria-label="Abrir menú de perfil"
 						>
 							<Avatar className="size-9">
+								{photoURL ? (
+									<AvatarImage src={photoURL} alt={displayName} referrerPolicy="no-referrer" />
+								) : null}
 								<AvatarFallback className="bg-secondary text-xs font-medium">
 									{initialsOf(displayName, email)}
 								</AvatarFallback>
