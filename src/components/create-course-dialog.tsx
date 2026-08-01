@@ -99,7 +99,7 @@ export function CreateCourseDialog({
 				{createdCode ? (
 					<>
 						<DialogHeader>
-							<div className="mb-1 flex size-10 items-center justify-center rounded-lg border border-brand/40 bg-brand/10 text-brand">
+							<div className="cut-sm mb-1 flex size-10 items-center justify-center border border-brand/40 bg-brand/10 text-brand">
 								<Check className="size-5" />
 							</div>
 							<DialogTitle>Curso creado</DialogTitle>
@@ -109,7 +109,7 @@ export function CreateCourseDialog({
 							</DialogDescription>
 						</DialogHeader>
 
-						<div className="flex items-center justify-between gap-3 rounded-lg border border-border bg-secondary/60 px-4 py-3">
+						<div className="cut flex items-center justify-between gap-3 border border-border bg-secondary/60 px-4 py-3">
 							<span className="font-mono text-lg tracking-[0.18em]">
 								{createdCode}
 							</span>
@@ -143,7 +143,7 @@ export function CreateCourseDialog({
 				) : (
 					<>
 						<DialogHeader>
-							<div className="mb-1 flex size-10 items-center justify-center rounded-lg border border-brand/40 bg-brand/10 text-brand">
+							<div className="cut-sm mb-1 flex size-10 items-center justify-center border border-brand/40 bg-brand/10 text-brand">
 								<GraduationCap className="size-5" />
 							</div>
 							<DialogTitle>Crear un curso</DialogTitle>

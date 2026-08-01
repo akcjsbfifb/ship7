@@ -189,7 +189,7 @@ export function ClassroomPanel({
 	return (
 		<div className="space-y-4">
 			{isTeacher && (
-				<div className="flex items-start gap-2.5 rounded-xl border border-brand/30 bg-brand/5 px-4 py-3 text-sm text-muted-foreground">
+				<div className="cut flex items-start gap-2.5 border border-brand/30 bg-brand/5 px-4 py-3 text-sm text-muted-foreground">
 					Todo el material que subas se indexa automáticamente para el tutor IA
 					del curso.
 				</div>
@@ -198,7 +198,7 @@ export function ClassroomPanel({
 			{isTeacher && (
 				<form
 					onSubmit={createTopic}
-					className="flex flex-col gap-2 rounded-xl border border-border bg-card p-4 sm:flex-row"
+					className="cut flex flex-col gap-2 border border-border bg-card p-4 sm:flex-row"
 				>
 					<Input
 						placeholder="Ej: Unidad 1 — Introducción"
@@ -217,7 +217,7 @@ export function ClassroomPanel({
 			)}
 
 			{topics.length === 0 ? (
-				<p className="rounded-xl border border-dashed border-border px-4 py-10 text-center text-sm text-muted-foreground">
+				<p className="cut border border-dashed border-border px-4 py-10 text-center text-sm text-muted-foreground">
 					{isTeacher
 						? "Creá un tema y subí archivos (PDF, DOCX, TXT) o pegá texto."
 						: "Todavía no hay material publicado."}

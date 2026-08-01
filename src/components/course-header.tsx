@@ -56,7 +56,7 @@ export function CourseHeader({
 				<Button
 					variant="ghost"
 					size="icon"
-					className="shrink-0 rounded-full text-muted-foreground"
+					className="shrink-0 text-muted-foreground"
 					asChild
 				>
 					<Link href="/dashboard" aria-label="Volver a mis cursos">
@@ -64,7 +64,7 @@ export function CourseHeader({
 					</Link>
 				</Button>
 
-				<div className="flex size-9 shrink-0 items-center justify-center rounded-lg border border-brand/40 bg-brand/10 text-brand">
+				<div className="cut-sm flex size-9 shrink-0 items-center justify-center border border-brand/40 bg-brand/10 text-brand">
 					<GraduationCap className="size-5" />
 				</div>
 

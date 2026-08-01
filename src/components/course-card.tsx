@@ -21,14 +21,14 @@ export function CourseCard({
 	return (
 		<Link
 			href={`/courses/${course.id}`}
-			className="group block rounded-xl outline-none focus-visible:ring-2 focus-visible:ring-ring"
+			className="group block cut outline-none focus-visible:ring-2 focus-visible:ring-ring"
 			aria-label={`Abrir ${course.title}`}
 		>
-			<Card className="h-full overflow-hidden rounded-xl shadow-none transition-colors group-hover:border-brand/50">
-				<div className="flex items-center justify-between border-b border-border bg-secondary/60 px-5 py-4">
+			<Card className="h-full overflow-hidden shadow-none transition-colors group-hover:border-brand/50">
+				<div className="flex items-center justify-between border-b border-border bg-cream/60 px-5 py-4 dark:bg-secondary/60">
 					<span className="flex min-w-0 items-center gap-2 font-mono text-xs text-muted-foreground">
 						{role === "teacher" ? (
-							<span className="truncate rounded border border-border bg-background px-1.5 py-0.5 text-[11px]">
+							<span className="truncate cut-sm border border-border bg-background px-1.5 py-0.5 text-[11px]">
 								{course.inviteCode}
 							</span>
 						) : (
@@ -36,7 +36,7 @@ export function CourseCard({
 						)}
 					</span>
 					<span className="flex items-center gap-1.5 text-xs text-muted-foreground">
-						<span className="size-2 rounded-full bg-brand" aria-hidden />
+						<span className="size-2 bg-warm" aria-hidden />
 						Tutor IA
 					</span>
 				</div>

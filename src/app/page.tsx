@@ -21,13 +21,16 @@ const problems = [
 
 export default function Home() {
 	return (
-		<div className="min-h-dvh bg-background">
+		<div className="min-h-dvh">
 			<Navbar />
 
 			<main>
 				{/* Hero */}
-				<section className="mx-auto grid max-w-6xl items-center gap-10 px-4 pb-20 pt-14 md:grid-cols-[1.2fr_1fr] md:pb-28 md:pt-20">
+				<section className="relative mx-auto grid max-w-6xl items-center gap-12 px-4 pb-20 pt-14 md:grid-cols-[1.15fr_0.85fr] md:pb-28 md:pt-20">
 					<div className="space-y-6">
+						<p className="font-mono text-xs tracking-wide text-warm">
+							EducAI · Rosario
+						</p>
 						<h1 className="text-balance text-4xl font-semibold tracking-tight md:text-5xl">
 							Un tutor IA que responde solo con la bibliografía de tu cátedra
 						</h1>
@@ -39,28 +42,35 @@ export default function Home() {
 							<Button
 								asChild
 								size="lg"
-								className="bg-brand text-brand-foreground hover:bg-brand/90"
+								className="cut-sm bg-brand text-brand-foreground hover:bg-brand/90"
 							>
 								<Link href="/register">Crear cuenta</Link>
 							</Button>
-							<Button variant="outline" size="lg" asChild>
+							<Button
+								variant="outline"
+								size="lg"
+								asChild
+								className="cut-sm border-border bg-card/80"
+							>
 								<Link href="/login">Iniciar sesión</Link>
 							</Button>
 						</div>
 					</div>
-					<div className="hidden justify-center rounded-2xl border border-brand/25 bg-brand/5 p-10 md:flex">
-						<Image
-							src="/logos/mortarboard.svg"
-							alt="Birrete de graduación"
-							width={260}
-							height={260}
-							priority
-						/>
+					<div className="cut-brackets relative hidden p-2 md:block">
+						<div className="cut-lg flex justify-center border border-brand/30 bg-cream/70 p-10">
+							<Image
+								src="/logos/mortarboard.svg"
+								alt="Birrete de graduación"
+								width={260}
+								height={260}
+								priority
+							/>
+						</div>
 					</div>
 				</section>
 
 				{/* Problemas */}
-				<section className="border-y border-border bg-card">
+				<section className="border-y border-border bg-card/70">
 					<div className="mx-auto grid max-w-6xl gap-10 px-4 py-16 md:grid-cols-[1fr_1.4fr] md:py-24">
 						<div className="space-y-4">
 							<h2 className="text-2xl font-semibold tracking-tight md:text-3xl">
@@ -70,18 +80,25 @@ export default function Home() {
 								Sobre todo en la educación pública rosarina, en cátedras con
 								mucho material de lectura.
 							</p>
-							<Image
-								src="/logos/question.svg"
-								alt="Signo de pregunta"
-								width={96}
-								height={96}
-								className="pt-2"
-							/>
+							<div className="cut-sm inline-flex border border-warm/35 bg-warm/10 p-3">
+								<Image
+									src="/logos/question.svg"
+									alt="Signo de pregunta"
+									width={72}
+									height={72}
+								/>
+							</div>
 						</div>
-						<ol className="space-y-8">
+						<ol className="space-y-6">
 							{problems.map((problem, i) => (
-								<li key={problem.title} className="flex gap-5">
-									<span className="font-mono text-sm text-brand" aria-hidden>
+								<li
+									key={problem.title}
+									className="cut flex gap-5 border border-border bg-background/60 p-5"
+								>
+									<span
+										className="font-mono text-sm text-warm"
+										aria-hidden
+									>
 										{String(i + 1).padStart(2, "0")}
 									</span>
 									<div>
@@ -102,7 +119,7 @@ export default function Home() {
 						Como Google Classroom, con un NotebookLM adentro de cada curso
 					</h2>
 					<div className="mt-10 grid gap-4 md:grid-cols-3">
-						<div className="rounded-2xl border border-border bg-card p-6 md:col-span-2">
+						<div className="cut-lg border border-border bg-card p-6 md:col-span-2">
 							<div className="flex flex-col gap-6 sm:flex-row sm:items-center">
 								<Image
 									src="/logos/book.svg"
@@ -121,7 +138,7 @@ export default function Home() {
 								</div>
 							</div>
 						</div>
-						<div className="rounded-2xl border border-brand/25 bg-brand/5 p-6">
+						<div className="cut-lg border border-warm/40 bg-warm/10 p-6">
 							<Image
 								src="/logos/key.svg"
 								alt="Llave de acceso"
@@ -134,27 +151,29 @@ export default function Home() {
 								trámites.
 							</p>
 						</div>
-						<div className="rounded-2xl bg-brand p-6 text-brand-foreground">
-							<Image
-								src="/logos/chat.svg"
-								alt="Conversación de preguntas y respuestas"
-								width={72}
-								height={72}
-							/>
-							<h3 className="mt-4 font-medium">Cada curso tiene su chat</h3>
-							<p className="mt-1 text-sm leading-relaxed opacity-90">
-								El alumno pregunta lo que no entiende, cuando lo necesita, sin
-								esperar la próxima clase.
-							</p>
+						<div className="cut-brackets relative p-1.5">
+							<div className="cut-lg bg-brand p-6 text-brand-foreground">
+								<Image
+									src="/logos/chat.svg"
+									alt="Conversación de preguntas y respuestas"
+									width={72}
+									height={72}
+								/>
+								<h3 className="mt-4 font-medium">Cada curso tiene su chat</h3>
+								<p className="mt-1 text-sm leading-relaxed opacity-90">
+									El alumno pregunta lo que no entiende, cuando lo necesita, sin
+									esperar la próxima clase.
+								</p>
+							</div>
 						</div>
-						<div className="rounded-2xl border border-border bg-card p-6 md:col-span-2">
+						<div className="cut-lg border border-border bg-card p-6 md:col-span-2">
 							<h3 className="font-medium">Respuestas ancladas a las fuentes</h3>
 							<p className="mt-1 max-w-lg text-sm leading-relaxed text-muted-foreground">
 								La IA responde solo en base a los documentos del curso y cita de
 								cuál sacó cada respuesta. Explica el material para que el alumno
 								aprenda, en lugar de resolverle el ejercicio.
 							</p>
-							<p className="mt-4 font-mono text-xs text-muted-foreground">
+							<p className="mt-4 font-mono text-xs text-brand">
 								RAG con embeddings + pgvector, sin información de la web
 							</p>
 						</div>
@@ -182,21 +201,23 @@ export default function Home() {
 				</section>
 
 				{/* CTA final */}
-				<section className="border-t border-border bg-card">
+				<section className="border-t border-border bg-card/70">
 					<div className="mx-auto flex max-w-6xl flex-col items-start gap-6 px-4 py-16 md:flex-row md:items-center md:justify-between md:py-20">
-						<div>
-							<h2 className="text-2xl font-semibold tracking-tight md:text-3xl">
-								Creá tu primer curso hoy
-							</h2>
-							<p className="mt-2 text-muted-foreground">
-								Subí el material que ya tenés y compartí el código con tus
-								alumnos.
-							</p>
+						<div className="cut-brackets relative p-1.5">
+							<div className="cut-lg border border-brand/25 bg-cream/50 p-6 md:p-8">
+								<h2 className="text-2xl font-semibold tracking-tight md:text-3xl">
+									Creá tu primer curso hoy
+								</h2>
+								<p className="mt-2 max-w-md text-muted-foreground">
+									Subí el material que ya tenés y compartí el código con tus
+									alumnos.
+								</p>
+							</div>
 						</div>
 						<Button
 							asChild
 							size="lg"
-							className="bg-brand text-brand-foreground hover:bg-brand/90"
+							className="cut-sm bg-warm text-warm-foreground hover:bg-warm/90"
 						>
 							<Link href="/register">Crear cuenta</Link>
 						</Button>
@@ -206,7 +227,7 @@ export default function Home() {
 
 			<footer className="border-t border-border">
 				<div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-6 text-sm text-muted-foreground">
-					<span>EducAI</span>
+					<span className="font-medium text-foreground">EducAI</span>
 					<span>Hecho en Rosario, Argentina</span>
 				</div>
 			</footer>

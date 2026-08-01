@@ -41,9 +41,9 @@ export function DashboardHome({
 				aria-label="Acciones rápidas"
 				className="mb-10 grid grid-cols-1 gap-4 md:grid-cols-2"
 			>
-				<div className="flex flex-col gap-4 rounded-xl border border-brand/40 bg-brand/5 p-5">
+				<div className="cut flex flex-col gap-4 border border-warm/40 bg-warm/10 p-5">
 					<div className="flex items-start gap-3">
-						<div className="flex size-10 shrink-0 items-center justify-center rounded-lg border border-brand/40 bg-brand/10 text-brand">
+						<div className="cut-sm flex size-10 shrink-0 items-center justify-center border border-warm/40 bg-warm/15 text-warm">
 							<KeyRound className="size-5" />
 						</div>
 						<div className="min-w-0">
@@ -55,15 +55,18 @@ export function DashboardHome({
 							</p>
 						</div>
 					</div>
-					<Button className="w-full sm:w-auto" onClick={() => setJoinOpen(true)}>
+					<Button
+						className="w-full bg-warm text-warm-foreground hover:bg-warm/90 sm:w-auto"
+						onClick={() => setJoinOpen(true)}
+					>
 						<KeyRound className="size-4" />
 						Ingresar código
 					</Button>
 				</div>
 
-				<div className="flex flex-col gap-4 rounded-xl border border-border bg-card p-5">
+				<div className="cut flex flex-col gap-4 border border-border bg-card p-5">
 					<div className="flex items-start gap-3">
-						<div className="flex size-10 shrink-0 items-center justify-center rounded-lg border border-border bg-secondary text-foreground">
+						<div className="cut-sm flex size-10 shrink-0 items-center justify-center border border-border bg-secondary text-foreground">
 							<GraduationCap className="size-5" />
 						</div>
 						<div className="min-w-0">
@@ -110,8 +113,8 @@ export function DashboardHome({
 							))}
 						</div>
 					) : (
-						<div className="flex flex-col items-center gap-4 rounded-xl border border-dashed border-border px-6 py-14 text-center">
-							<div className="flex size-12 items-center justify-center rounded-full border border-brand/40 bg-brand/10 text-brand">
+						<div className="cut flex flex-col items-center gap-4 border border-dashed border-border px-6 py-14 text-center">
+							<div className="cut-sm flex size-12 items-center justify-center border border-warm/40 bg-warm/10 text-warm">
 								<KeyRound className="size-5" />
 							</div>
 							<div>
@@ -136,8 +139,8 @@ export function DashboardHome({
 							))}
 						</div>
 					) : (
-						<div className="flex flex-col items-center gap-4 rounded-xl border border-dashed border-border px-6 py-14 text-center">
-							<div className="flex size-12 items-center justify-center rounded-full border border-border bg-secondary">
+						<div className="cut flex flex-col items-center gap-4 border border-dashed border-border px-6 py-14 text-center">
+							<div className="cut-sm flex size-12 items-center justify-center border border-border bg-secondary">
 								<GraduationCap className="size-5" />
 							</div>
 							<div>

@@ -210,7 +210,7 @@ export function ChatbotPanel({
 
 	if (!ready || !activeThreadId) {
 		return (
-			<div className="flex h-[min(70vh,640px)] items-center justify-center rounded-xl border text-sm text-muted-foreground">
+			<div className="flex h-[min(70vh,640px)] items-center justify-center cut border text-sm text-muted-foreground">
 				Cargando chat…
 			</div>
 		);
@@ -386,7 +386,7 @@ function ChatbotInner({
 	};
 
 	return (
-		<div className="grid h-full min-h-[min(72vh,680px)] grid-cols-1 overflow-hidden rounded-xl border border-border bg-card lg:grid-cols-[minmax(260px,320px)_1fr]">
+		<div className="grid h-full min-h-[min(72vh,680px)] grid-cols-1 cut overflow-hidden border border-border bg-card lg:grid-cols-[minmax(260px,320px)_1fr]">
 			<aside className="flex min-h-0 flex-col border-b lg:border-b-0 lg:border-r">
 				<div className="flex shrink-0 items-center justify-between gap-2 border-b px-3 py-2.5">
 					<h3 className="text-sm font-semibold">Conversaciones</h3>
@@ -553,7 +553,7 @@ function ChatbotInner({
 			<section className="flex min-h-0 min-w-0 flex-col">
 				<div className="shrink-0 border-b px-4 py-3">
 					<div className="flex items-center gap-2">
-						<span className="flex size-8 items-center justify-center rounded-lg border border-brand/40 bg-brand/10 text-brand">
+						<span className="cut-sm flex size-8 items-center justify-center border border-brand/40 bg-brand/10 text-brand">
 							<Bot className="size-4" />
 						</span>
 						<div>
@@ -580,9 +580,9 @@ function ChatbotInner({
 								className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}
 							>
 								<div
-									className={`max-w-[85%] rounded-lg px-3 py-2 text-sm ${
+									className={`max-w-[85%] cut-sm px-3 py-2 text-sm ${
 										m.role === "user"
-											? "bg-primary text-primary-foreground"
+											? "bg-brand text-brand-foreground"
 											: "bg-muted"
 									}`}
 								>
@@ -613,13 +613,13 @@ function ChatbotInner({
 						value={input}
 						onChange={handleInputChange}
 						placeholder="Escribí una consulta para la IA del curso…"
-						className="flex-1 rounded-2xl border bg-background px-4 py-2.5 text-sm"
+						className="flex-1 cut border bg-background px-4 py-2.5 text-sm"
 						disabled={isLoading}
 					/>
 					<Button
 						type="submit"
 						disabled={isLoading}
-						className="rounded-full bg-brand text-brand-foreground hover:bg-brand/90"
+						className="bg-warm text-warm-foreground hover:bg-warm/90"
 					>
 						{isLoading ? "…" : "Enviar"}
 					</Button>

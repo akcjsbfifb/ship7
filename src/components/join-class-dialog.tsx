@@ -77,7 +77,7 @@ export function JoinClassDialog({
 		>
 			<DialogContent className="sm:max-w-md">
 				<DialogHeader>
-					<div className="mb-1 flex size-10 items-center justify-center rounded-lg border border-brand/40 bg-brand/10 text-brand">
+					<div className="cut-sm mb-1 flex size-10 items-center justify-center border border-warm/40 bg-warm/10 text-warm">
 						<KeyRound className="size-5" />
 					</div>
 					<DialogTitle>Unirse a una clase</DialogTitle>

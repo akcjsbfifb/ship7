@@ -4,52 +4,62 @@
 
 @layer base {
 	:root {
-		--background: 0 0% 98.5%;
-		--foreground: 0 0% 14%;
-		--card: 0 0% 100%;
-		--card-foreground: 0 0% 14%;
-		--popover: 0 0% 100%;
-		--popover-foreground: 0 0% 14%;
-		--primary: 0 0% 16%;
-		--primary-foreground: 0 0% 98%;
-		--secondary: 0 0% 95%;
-		--secondary-foreground: 0 0% 16%;
-		--muted: 0 0% 95%;
-		--muted-foreground: 0 0% 45%;
-		--accent: 0 0% 95%;
-		--accent-foreground: 0 0% 16%;
-		--destructive: 0 84.2% 60.2%;
+		/* Warm cream paper — matches icon fills (#FFF2D4 / #FCE3C3 family) */
+		--background: 36 45% 97%;
+		--foreground: 10 25% 12%;
+		--card: 36 50% 99%;
+		--card-foreground: 10 25% 12%;
+		--popover: 36 50% 99%;
+		--popover-foreground: 10 25% 12%;
+		--primary: 10 25% 14%;
+		--primary-foreground: 36 40% 97%;
+		--secondary: 36 28% 92%;
+		--secondary-foreground: 10 20% 18%;
+		--muted: 36 22% 92%;
+		--muted-foreground: 18 10% 40%;
+		--accent: 36 30% 91%;
+		--accent-foreground: 10 20% 18%;
+		--destructive: 0 72% 51%;
 		--destructive-foreground: 0 0% 98%;
-		--border: 0 0% 90%;
-		--input: 0 0% 90%;
-		--ring: 86 69% 23%;
-		--brand: 86 69% 23%;
-		--brand-foreground: 80 40% 97%;
-		--radius: 0.625rem;
+		--border: 30 18% 84%;
+		--input: 30 18% 84%;
+		/* Teal from mortarboard / chat (#228E9D) */
+		--ring: 187 64% 37%;
+		--brand: 187 64% 37%;
+		--brand-foreground: 36 40% 98%;
+		/* Amber accent from icons (#ED8F27) */
+		--warm: 30 85% 54%;
+		--warm-foreground: 24 60% 12%;
+		--cream: 40 70% 90%;
+		--radius: 0.25rem;
+		--cut: 0.75rem;
 	}
 
 	.dark {
-		--background: 0 0% 10%;
-		--foreground: 0 0% 96%;
-		--card: 0 0% 14%;
-		--card-foreground: 0 0% 96%;
-		--popover: 0 0% 14%;
-		--popover-foreground: 0 0% 96%;
-		--primary: 0 0% 92%;
-		--primary-foreground: 0 0% 14%;
-		--secondary: 0 0% 18%;
-		--secondary-foreground: 0 0% 96%;
-		--muted: 0 0% 18%;
-		--muted-foreground: 0 0% 65%;
-		--accent: 0 0% 18%;
-		--accent-foreground: 0 0% 96%;
-		--destructive: 0 62.8% 30.6%;
+		--background: 200 12% 9%;
+		--foreground: 36 30% 94%;
+		--card: 200 10% 12%;
+		--card-foreground: 36 30% 94%;
+		--popover: 200 10% 12%;
+		--popover-foreground: 36 30% 94%;
+		--primary: 36 30% 94%;
+		--primary-foreground: 200 12% 10%;
+		--secondary: 200 8% 16%;
+		--secondary-foreground: 36 25% 92%;
+		--muted: 200 8% 16%;
+		--muted-foreground: 30 10% 62%;
+		--accent: 200 8% 18%;
+		--accent-foreground: 36 25% 92%;
+		--destructive: 0 55% 38%;
 		--destructive-foreground: 0 0% 98%;
-		--border: 0 0% 20%;
-		--input: 0 0% 22%;
-		--ring: 85 40% 55%;
-		--brand: 85 40% 55%;
-		--brand-foreground: 86 65% 10%;
+		--border: 200 8% 22%;
+		--input: 200 8% 22%;
+		--ring: 187 45% 48%;
+		--brand: 187 45% 48%;
+		--brand-foreground: 200 20% 8%;
+		--warm: 30 75% 55%;
+		--warm-foreground: 36 40% 96%;
+		--cream: 30 20% 18%;
 	}
 }
 
@@ -59,5 +69,95 @@
 	}
 	body {
 		@apply bg-background text-foreground;
+		background-image:
+			radial-gradient(
+				ellipse 80% 50% at 100% -10%,
+				hsl(187 64% 37% / 0.07),
+				transparent 55%
+			),
+			radial-gradient(
+				ellipse 60% 40% at 0% 100%,
+				hsl(30 85% 54% / 0.06),
+				transparent 50%
+			);
+		background-attachment: fixed;
+	}
+}
+
+/*
+ * Esquinas cortadas (chamfer) — mismo lenguaje geométrico que los iconos.
+ * El borde solo aparece en los tramos rectos; las diagonales quedan abiertas
+ * como las "líneas cortadas" de los SVG.
+ */
+@layer utilities {
+	.cut {
+		--cut: 0.75rem;
+		clip-path: polygon(
+			var(--cut) 0,
+			calc(100% - var(--cut)) 0,
+			100% var(--cut),
+			100% calc(100% - var(--cut)),
+			calc(100% - var(--cut)) 100%,
+			var(--cut) 100%,
+			0 calc(100% - var(--cut)),
+			0 var(--cut)
+		);
+	}
+
+	.cut-sm {
+		--cut: 0.5rem;
+		clip-path: polygon(
+			var(--cut) 0,
+			calc(100% - var(--cut)) 0,
+			100% var(--cut),
+			100% calc(100% - var(--cut)),
+			calc(100% - var(--cut)) 100%,
+			var(--cut) 100%,
+			0 calc(100% - var(--cut)),
+			0 var(--cut)
+		);
+	}
+
+	.cut-lg {
+		--cut: 1.15rem;
+		clip-path: polygon(
+			var(--cut) 0,
+			calc(100% - var(--cut)) 0,
+			100% var(--cut),
+			100% calc(100% - var(--cut)),
+			calc(100% - var(--cut)) 100%,
+			var(--cut) 100%,
+			0 calc(100% - var(--cut)),
+			0 var(--cut)
+		);
+	}
+
+	/* Marcos tipo icono: brackets en las esquinas, sin caja cerrada */
+	.cut-brackets {
+		position: relative;
+	}
+
+	.cut-brackets::before,
+	.cut-brackets::after {
+		content: "";
+		position: absolute;
+		width: 1.1rem;
+		height: 1.1rem;
+		pointer-events: none;
+		border-color: hsl(var(--warm));
+		border-style: solid;
+		opacity: 0.85;
+	}
+
+	.cut-brackets::before {
+		top: 0.35rem;
+		left: 0.35rem;
+		border-width: 2px 0 0 2px;
+	}
+
+	.cut-brackets::after {
+		right: 0.35rem;
+		bottom: 0.35rem;
+		border-width: 0 2px 2px 0;
 	}
 }

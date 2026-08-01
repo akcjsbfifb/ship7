@@ -48,7 +48,7 @@ export function StudentsPanel({ courseId }: { courseId: string }) {
 			{loading ? (
 				<p className="text-sm text-muted-foreground">Cargando…</p>
 			) : students.length === 0 ? (
-				<p className="rounded-xl border border-dashed border-border px-4 py-10 text-center text-sm text-muted-foreground">
+				<p className="cut border border-dashed border-border px-4 py-10 text-center text-sm text-muted-foreground">
 					Todavía no hay alumnos. Compartí el código de invitación.
 				</p>
 			) : (

@@ -40,7 +40,7 @@ export function StreamPage({
 
 	return (
 		<div className="mx-auto flex w-full max-w-3xl flex-col gap-4 px-4 py-6 md:px-6">
-			<div className="overflow-hidden rounded-2xl border border-border bg-card">
+			<div className="cut-lg overflow-hidden border border-border bg-card">
 				<div className="flex items-end justify-between gap-4 border-b border-brand/30 bg-brand/10 px-6 py-8">
 					<div>
 						<h1 className="text-pretty text-2xl font-semibold text-foreground md:text-3xl">
@@ -52,7 +52,7 @@ export function StreamPage({
 							</p>
 						)}
 					</div>
-					<span className="hidden size-14 shrink-0 items-center justify-center rounded-xl border border-brand/40 bg-background text-brand sm:flex">
+					<span className="cut hidden size-14 shrink-0 items-center justify-center border border-brand/40 bg-background text-brand sm:flex">
 						<GraduationCap className="size-7" />
 					</span>
 				</div>
@@ -74,11 +74,11 @@ export function StreamPage({
 			</div>
 
 			{isTeacher ? (
-				<div className="rounded-xl border border-border bg-card p-5">
+				<div className="cut border border-border bg-card p-5">
 					<p className="text-xs uppercase tracking-wide text-muted-foreground">
 						Código para alumnos
 					</p>
-					<code className="mt-2 block font-mono text-2xl tracking-[0.18em]">
+					<code className="mt-2 block font-mono text-2xl tracking-[0.18em] text-warm">
 						{course.inviteCode}
 					</code>
 					<p className="mt-2 text-sm text-muted-foreground">
@@ -97,7 +97,7 @@ export function StreamPage({
 					</div>
 				</div>
 			) : (
-				<div className="rounded-xl border border-brand/30 bg-brand/5 p-5">
+				<div className="cut border border-warm/35 bg-warm/10 p-5">
 					<p className="text-sm leading-relaxed text-muted-foreground">
 						Explorá el material en{" "}
 						<span className="font-medium text-foreground">Trabajo en clase</span>{" "}
